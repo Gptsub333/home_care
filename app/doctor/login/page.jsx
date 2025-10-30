@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 
-export default function LoginPage() {
+export default function DoctorLoginPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
@@ -17,8 +17,9 @@ export default function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log("Login attempt:", formData)
-    router.push("/dashboard/patient")
+    console.log("Doctor login attempt:", formData)
+    // Redirect to doctor dashboard
+    router.push("/dashboard/doctor")
   }
 
   return (
@@ -37,21 +38,26 @@ export default function LoginPage() {
         <Card className="shadow-xl border-gray-200 bg-white">
           <CardHeader className="text-center pb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
                 </svg>
               </div>
             </div>
-            <CardTitle className="text-3xl font-serif text-gray-900">Welcome Back</CardTitle>
-            <CardDescription className="text-gray-600">Sign in to access your MediLux account</CardDescription>
+            <CardTitle className="text-3xl font-serif text-gray-900">Provider Portal</CardTitle>
+            <CardDescription className="text-gray-600">Sign in to your healthcare provider account</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-900">
-                  Email Address
+                  Professional Email
                 </Label>
                 <div className="relative">
                   <svg
@@ -70,7 +76,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="doctor@hospital.com"
                     className="pl-10 h-12 bg-white border-gray-300"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -114,34 +120,34 @@ export default function LoginPage() {
                   <input type="checkbox" className="rounded border-gray-300" />
                   <span className="text-gray-600">Remember me</span>
                 </label>
-                <Link href="/forgot-password" className="text-teal-600 hover:underline">
+                <Link href="/forgot-password" className="text-blue-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600"
+                className="w-full h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600"
               >
-                Sign In
+                Sign In to Provider Portal
               </Button>
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link href="/register" className="text-teal-600 font-semibold hover:underline">
-                Sign up
+              Don't have a provider account?{" "}
+              <Link href="/doctor/register" className="text-blue-600 font-semibold hover:underline">
+                Apply now
               </Link>
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-600 mb-4">Are you a healthcare provider?</p>
-              <Link href="/doctor/login">
+              <p className="text-sm text-gray-600 mb-4">Are you a patient?</p>
+              <Link href="/login">
                 <Button
                   variant="outline"
                   className="w-full border-gray-300 text-gray-900 hover:bg-gray-50 bg-transparent"
                 >
-                  Provider Sign In
+                  Patient Sign In
                 </Button>
               </Link>
             </div>

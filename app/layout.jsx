@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 export const metadata = {
   title: "MediLux - Premium Healthcare at Home",
   description: "Connect with verified healthcare professionals for luxury in-home medical services",
-    generator: 'shivam pandey'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({ children }) {
