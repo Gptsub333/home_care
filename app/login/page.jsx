@@ -7,19 +7,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { toast } from 'sonner';
+import axios from 'axios';
 
 export default function LoginPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
+    email: '',
+    password: '',
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Login attempt:", formData)
-    router.push("/dashboard/patient")
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`, formData);
+      if (res.status === 201) {
+        router.push('/dashboard/patient');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -128,7 +136,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Don't have an account?{" "}
+              Don't have an account?{' '}
               <Link href="/register" className="text-teal-600 font-semibold hover:underline">
                 Sign up
               </Link>
@@ -149,5 +157,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
