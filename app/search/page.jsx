@@ -16,7 +16,7 @@ import Image from "next/image"
 const mockProviders = [
   {
     id: 1,
-    name: "Dr. Sarah Johnson",
+    name: " Sarah Johnson",
     specialty: "General Physician",
     rating: 4.9,
     reviews: 234,
@@ -30,8 +30,8 @@ const mockProviders = [
   },
   {
     id: 2,
-    name: "Dr. Michael Chen",
-    specialty: "Cardiologist",
+    name: " Michael Chen",
+    specialty: "Family Medics",
     rating: 4.8,
     reviews: 189,
     experience: 12,
@@ -44,7 +44,7 @@ const mockProviders = [
   },
   {
     id: 3,
-    name: "Nurse Emily Davis",
+    name: "Emily Davis",
     specialty: "Registered Nurse",
     rating: 4.9,
     reviews: 312,
@@ -58,7 +58,7 @@ const mockProviders = [
   },
   {
     id: 4,
-    name: "Dr. James Wilson",
+    name: "James Wilson",
     specialty: "Pediatrician",
     rating: 4.7,
     reviews: 156,
@@ -72,7 +72,7 @@ const mockProviders = [
   },
   {
     id: 5,
-    name: "Dr. Lisa Anderson",
+    name: "Lisa Anderson",
     specialty: "Dermatologist",
     rating: 4.9,
     reviews: 278,
@@ -86,7 +86,7 @@ const mockProviders = [
   },
   {
     id: 6,
-    name: "Dr. Robert Martinez",
+    name: " Robert Martinez",
     specialty: "Dentist",
     rating: 4.8,
     reviews: 201,
@@ -101,19 +101,17 @@ const mockProviders = [
 ]
 
 const specialties = [
-  "General Physician",
-  "Cardiologist",
+  "physical therapist ",
+  "Family Medics",
   "Registered Nurse",
   "Pediatrician",
-  "Dermatologist",
+  "Occupational Theripist",
   "Dentist",
 ]
 const allServices = [
   "Home Visit",
   "Consultation",
   "Follow-up",
-  "Heart Checkup",
-  "ECG",
   "IV Therapy",
   "Wound Care",
   "Medication",
@@ -122,8 +120,6 @@ const allServices = [
   "Skin Treatment",
   "Cosmetic",
   "Dental Checkup",
-  "Cleaning",
-  "Emergency",
 ]
 
 export default function SearchPage() {

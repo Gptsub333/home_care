@@ -1,44 +1,55 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
+import { AutocompleteInput } from "@/components/autocomplete-input"
 
 export default function HomePage() {
+  const [specialty, setSpecialty] = useState("")
+  const [location, setLocation] = useState("")
+
+  const providerTypes = [
+    "Physical Therapist",
+    "Registered Nurse",
+    "Family Medic",
+    "Pediatrician",
+    "Occupational Therapist",
+    "Dentist",
+  ]
+
+  const californiaCities = [
+    "Los Angeles",
+    "San Francisco",
+    "San Diego",
+    "San Jose",
+    "Sacramento",
+    "Fresno",
+    "Long Beach",
+    "Oakland",
+    "Bakersfield",
+    "Anaheim",
+    "Santa Ana",
+    "Riverside",
+    "Stockton",
+    "Irvine",
+    "Fremont",
+  ]
+
   const categories = [
-    { name: "General Physician", icon: "🩺", count: "120+ Doctors" },
-    { name: "Nurses", icon: "👨‍⚕️", count: "200+ Nurses" },
-    { name: "Physiotherapy", icon: "💪", count: "80+ Therapists" },
-    { name: "Dentist", icon: "🦷", count: "60+ Dentists" },
+    { name: "Physical Therapist", icon: "💪", count: "80+ Therapists" },
+    { name: "Registered Nurse", icon: "👨‍⚕️", count: "200+ Nurses" },
+    { name: "Family Medic", icon: "🩺", count: "120+ Medics" },
     { name: "Pediatrician", icon: "👶", count: "90+ Specialists" },
-    { name: "Cardiologist", icon: "❤️", count: "50+ Specialists" },
+    { name: "Occupational Therapist", icon: "🧠", count: "65+ Therapists" },
+    { name: "Dentist", icon: "🦷", count: "60+ Dentists" },
   ]
 
   const featuredProviders = [
     {
       id: 1,
-      name: "Dr. Sarah Mitchell",
-      specialty: "General Physician",
-      rating: 4.9,
-      reviews: 234,
-      experience: "15 years",
-      price: "$150",
-      image: "/professional-female-doctor.png",
-    },
-    {
-      id: 2,
-      name: "Dr. James Chen",
-      specialty: "Cardiologist",
-      rating: 4.8,
-      reviews: 189,
-      experience: "12 years",
-      price: "$200",
-      image: "/male-cardiologist.jpg",
-    },
-    {
-      id: 3,
-      name: "Nurse Emily Roberts",
+      name: "Emily Roberts",
       specialty: "Registered Nurse",
       rating: 5.0,
       reviews: 312,
@@ -46,16 +57,33 @@ export default function HomePage() {
       price: "$80",
       image: "/professional-female-nurse.png",
     },
+    {
+      id: 2,
+      name: "James Wilson",
+      specialty: "Pediatrician",
+      rating: 4.9,
+      reviews: 234,
+      experience: "15 years",
+      price: "$150",
+      image: "/male-pediatrician.png",
+    },
+    {
+      id: 3,
+      name: "Robert Martinez",
+      specialty: "Dentist",
+      rating: 4.8,
+      reviews: 189,
+      experience: "12 years",
+      price: "$140",
+      image: "/male-dentist.png",
+    },
   ]
 
   const handleSearch = (e) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const specialty = formData.get("specialty")
-    const location = formData.get("location")
     const params = new URLSearchParams()
-    if (specialty) params.set("specialty", specialty.toString())
-    if (location) params.set("location", location.toString())
+    if (specialty) params.set("specialty", specialty)
+    if (location) params.set("location", location)
     window.location.href = `/search?${params.toString()}`
   }
 
@@ -119,45 +147,38 @@ export default function HomePage() {
               Healthcare at Your Doorstep
             </h1>
             <p className="text-lg md:text-xl text-white/95 mb-8 text-pretty max-w-2xl mx-auto">
-              Connect with verified medical professionals for premium in-home care
+              Connect with verified healthcare professionals for premium in-home care
             </p>
 
-            {/* Search Bar */}
             <Card className="max-w-3xl mx-auto shadow-2xl border-white/20 bg-white/95 backdrop-blur">
               <CardContent className="p-4 md:p-6">
                 <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <svg
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle cx="11" cy="11" r="8" />
-                      <path d="m21 21-4.35-4.35" />
-                    </svg>
-                    <Input
-                      name="specialty"
-                      placeholder="Search specialty..."
-                      className="pl-10 h-12 bg-background border-border"
-                    />
-                  </div>
-                  <div className="flex-1 relative">
-                    <svg
-                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    <Input
-                      name="location"
-                      placeholder="Your location..."
-                      className="pl-10 h-12 bg-background border-border"
-                    />
-                  </div>
+                  <AutocompleteInput
+                    name="specialty"
+                    placeholder="Select provider type..."
+                    options={providerTypes}
+                    value={specialty}
+                    onChange={setSpecialty}
+                    icon={
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
+                    }
+                  />
+                  <AutocompleteInput
+                    name="location"
+                    placeholder="Select city..."
+                    options={californiaCities}
+                    value={location}
+                    onChange={setLocation}
+                    icon={
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                    }
+                  />
                   <Button
                     type="submit"
                     className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full md:w-auto font-semibold"
@@ -348,7 +369,7 @@ export default function HomePage() {
                 <span className="text-xl font-serif font-bold">MediLux</span>
               </div>
               <p className="text-primary-foreground/80 text-sm leading-relaxed">
-                Premium healthcare delivered to your doorstep with verified medical professionals.
+                Premium healthcare delivered to your doorstep with verified healthcare professionals.
               </p>
             </div>
             <div>
@@ -356,7 +377,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm text-primary-foreground/80">
                 <li>
                   <Link href="/search" className="hover:text-primary-foreground">
-                    Find a Doctor
+                    Find a Provider
                   </Link>
                 </li>
                 <li>

@@ -22,6 +22,9 @@ export default function DoctorRegisterPage() {
     // Professional Info
     specialty: "",
     licenseId: "",
+    npiNumber: "",
+    credentials: "",
+    county: "",
     yearsOfExperience: "",
     qualifications: "",
     // Additional Info
@@ -293,6 +296,105 @@ export default function DoctorRegisterPage() {
                       />
                     </div>
                     <p className="text-xs text-gray-500">This will be verified by our team</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="npiNumber" className="text-gray-900">
+                      NPI Number *
+                    </Label>
+                    <div className="relative">
+                      <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                        />
+                      </svg>
+                      <Input
+                        id="npiNumber"
+                        type="text"
+                        placeholder="Enter your National Provider Identifier"
+                        className="pl-10 h-12 bg-white border-gray-300"
+                        value={formData.npiNumber}
+                        onChange={(e) => setFormData({ ...formData, npiNumber: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">10-digit National Provider Identifier number</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="credentials" className="text-gray-900">
+                      Credentials *
+                    </Label>
+                    <div className="relative">
+                      <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 01-2.827 0l-4.244-4.243a8 8 0 11-11.314 0z"
+                        />
+                      </svg>
+                      <Input
+                        id="credentials"
+                        type="text"
+                        placeholder="e.g., RN, LNP, MD, DO, PA"
+                        className="pl-10 h-12 bg-white border-gray-300"
+                        value={formData.credentials}
+                        onChange={(e) => setFormData({ ...formData, credentials: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">Professional credentials (e.g., RN, LNP, MD, etc.)</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="county" className="text-gray-900">
+                      County *
+                    </Label>
+                    <div className="relative">
+                      <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <Input
+                        id="county"
+                        type="text"
+                        placeholder="e.g., Jefferson, (Illinois)"
+                        className="pl-10 h-12 bg-white border-gray-300"
+                        value={formData.county}
+                        onChange={(e) => setFormData({ ...formData, county: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">County and state where you practice</p>
                   </div>
 
                   <div className="space-y-2">
