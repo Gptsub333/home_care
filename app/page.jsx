@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { AutocompleteInput } from "@/components/autocomplete-input"
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
 
 
 export default function HomePage() {
@@ -131,7 +132,7 @@ export default function HomePage() {
             <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
               Contact
             </Link>
-            <button onClick={handleLogout}>Log out</button>
+            <LogoutButton />
           </nav>
 
           <div className="flex items-center gap-3">

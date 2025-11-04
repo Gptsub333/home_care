@@ -8,9 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { toast } from 'sonner';
-import axios from 'axios';
-
-const backendurl = "http://localhost:5000/api"; 
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,45 +15,40 @@ export default function LoginPage() {
     email: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-      credentials: 'include', // ✅ required for cookies
-    });
+    try {
+      // ✅ Call YOUR OWN API route (same origin - no CORS issues!)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await res.json();
-    router.push("/");
-    if(res.ok){
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || data.message || "Login failed");
+        setIsLoading(false);
+        return;
+      }
+
       toast.success("Login successful!");
+      
+      // Redirect and refresh to trigger middleware
+      router.push("/");
+      router.refresh();
+
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Something went wrong. Please try again.");
+      setIsLoading(false);
     }
-
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
-    }
-
-   
-    
-  } catch (error) {
-    console.error("Login error:", error);
-    alert("Something went wrong");
-  }
-};
-
-const handleLogout = async () => {
-  await fetch("http://localhost:5000/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
-  router.push("/login");
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
@@ -112,6 +104,7 @@ const handleLogout = async () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -142,6 +135,7 @@ const handleLogout = async () => {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -159,8 +153,9 @@ const handleLogout = async () => {
               <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600"
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
