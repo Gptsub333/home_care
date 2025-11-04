@@ -181,7 +181,8 @@ export default function HomePage() {
                   />
                   <Button
                     type="submit"
-                    className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full md:w-auto font-semibold"
+                    className="h-12 px-8 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full md:w-auto font-semibold"
+                    onClick={handleSearch}
                   >
                     Search
                   </Button>
