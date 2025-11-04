@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { toast } from 'sonner';
 import axios from 'axios';
 
+const backendurl = "http://localhost:5000/api"; 
+
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -17,17 +19,40 @@ export default function LoginPage() {
     password: '',
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/login`, formData);
-      if (res.status === 201) {
-        router.push('/dashboard/patient');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+      credentials: 'include', // ✅ required for cookies
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
     }
-  };
+
+    // ✅ No need for localStorage now
+    router.push("/");
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong");
+  }
+};
+
+const handleLogout = async () => {
+  await fetch("http://localhost:5000/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  router.push("/login");
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
