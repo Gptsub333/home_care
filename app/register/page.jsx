@@ -20,11 +20,31 @@ export default function RegisterPage() {
     confirmPassword: "",
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Registration attempt:", formData)
-    router.push("/dashboard/patient")
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+      credentials: "include", // ✅ required for cookies
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    // ✅ No need for localStorage now
+    router.push("/");
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong");
   }
+};
 
   const detectLocation = () => {
     if (navigator.geolocation) {

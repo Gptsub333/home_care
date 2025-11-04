@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 
+const backendurl = "http://localhost:5000/api"; 
+
 export default function LoginPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -15,11 +17,40 @@ export default function LoginPage() {
     password: "",
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Login attempt:", formData)
-    router.push("/dashboard/patient")
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+      credentials: "include", // ✅ required for cookies
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    // ✅ No need for localStorage now
+    router.push("/");
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong");
   }
+};
+
+const handleLogout = async () => {
+  await fetch("http://localhost:5000/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  router.push("/login");
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
