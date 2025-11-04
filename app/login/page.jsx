@@ -31,14 +31,18 @@ const handleSubmit = async (e) => {
     });
 
     const data = await res.json();
+    router.push("/");
+    if(res.ok){
+      toast.success("Login successful!");
+    }
 
     if (!res.ok) {
       alert(data.message || "Login failed");
       return;
     }
 
-    // ✅ No need for localStorage now
-    router.push("/");
+   
+    
   } catch (error) {
     console.error("Login error:", error);
     alert("Something went wrong");
