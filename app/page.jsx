@@ -1,105 +1,111 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { AutocompleteInput } from "@/components/autocomplete-input"
-import { useRouter } from "next/navigation";
-
+import React from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { AutocompleteInput } from '@/components/autocomplete-input';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
-  const [specialty, setSpecialty] = useState("")
-  const [location, setLocation] = useState("")
+  const [specialty, setSpecialty] = React.useState('');
+  const [location, setLocation] = React.useState('');
+  const [token, setToken] = React.useState(null);
   const router = useRouter();
 
   const providerTypes = [
-    "Physical Therapist",
-    "Registered Nurse",
-    "Family Medic",
-    "Pediatrician",
-    "Occupational Therapist",
-    "Dentist",
-  ]
+    'Physical Therapist',
+    'Registered Nurse',
+    'Family Medic',
+    'Pediatrician',
+    'Occupational Therapist',
+    'Dentist',
+  ];
 
   const californiaCities = [
-    "Los Angeles",
-    "San Francisco",
-    "San Diego",
-    "San Jose",
-    "Sacramento",
-    "Fresno",
-    "Long Beach",
-    "Oakland",
-    "Bakersfield",
-    "Anaheim",
-    "Santa Ana",
-    "Riverside",
-    "Stockton",
-    "Irvine",
-    "Fremont",
-  ]
+    'Los Angeles',
+    'San Francisco',
+    'San Diego',
+    'San Jose',
+    'Sacramento',
+    'Fresno',
+    'Long Beach',
+    'Oakland',
+    'Bakersfield',
+    'Anaheim',
+    'Santa Ana',
+    'Riverside',
+    'Stockton',
+    'Irvine',
+    'Fremont',
+  ];
 
   const categories = [
-    { name: "Physical Therapist", icon: "💪", count: "80+ Therapists" },
-    { name: "Registered Nurse", icon: "👨‍⚕️", count: "200+ Nurses" },
-    { name: "Family Medic", icon: "🩺", count: "120+ Medics" },
-    { name: "Pediatrician", icon: "👶", count: "90+ Specialists" },
-    { name: "Occupational Therapist", icon: "🧠", count: "65+ Therapists" },
-    { name: "Dentist", icon: "🦷", count: "60+ Dentists" },
-  ]
+    { name: 'Physical Therapist', icon: '💪', count: '80+ Therapists' },
+    { name: 'Registered Nurse', icon: '👨‍⚕️', count: '200+ Nurses' },
+    { name: 'Family Medic', icon: '🩺', count: '120+ Medics' },
+    { name: 'Pediatrician', icon: '👶', count: '90+ Specialists' },
+    { name: 'Occupational Therapist', icon: '🧠', count: '65+ Therapists' },
+    { name: 'Dentist', icon: '🦷', count: '60+ Dentists' },
+  ];
 
   const featuredProviders = [
     {
       id: 1,
-      name: "Emily Roberts",
-      specialty: "Registered Nurse",
+      name: 'Emily Roberts',
+      specialty: 'Registered Nurse',
       rating: 5.0,
       reviews: 312,
-      experience: "8 years",
-      price: "$80",
-      image: "/professional-female-nurse.png",
+      experience: '8 years',
+      price: '$80',
+      image: '/professional-female-nurse.png',
     },
     {
       id: 2,
-      name: "James Wilson",
-      specialty: "Pediatrician",
+      name: 'James Wilson',
+      specialty: 'Pediatrician',
       rating: 4.9,
       reviews: 234,
-      experience: "15 years",
-      price: "$150",
-      image: "/male-pediatrician.png",
+      experience: '15 years',
+      price: '$150',
+      image: '/male-pediatrician.png',
     },
     {
       id: 3,
-      name: "Robert Martinez",
-      specialty: "Dentist",
+      name: 'Robert Martinez',
+      specialty: 'Dentist',
       rating: 4.8,
       reviews: 189,
-      experience: "12 years",
-      price: "$140",
-      image: "/male-dentist.png",
+      experience: '12 years',
+      price: '$140',
+      image: '/male-dentist.png',
     },
-  ]
+  ];
 
   const handleSearch = (e) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    if (specialty) params.set("specialty", specialty)
-    if (location) params.set("location", location)
-    window.location.href = `/search?${params.toString()}`
-  }
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (specialty) params.set('specialty', specialty);
+    if (location) params.set('location', location);
+    window.location.href = `/search?${params.toString()}`;
+  };
   const handleLogout = async () => {
-  
-  const res = await fetch("http://localhost:5000/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
-  if(res.ok){
-    alert("Logged out successfully"); 
-    router.push("/login");
-  }
-};
+    const res = await fetch('http://localhost:5000/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      alert('Logged out successfully');
+      router.push('/login');
+    }
+  };
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setToken(token);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -135,14 +141,22 @@ export default function HomePage() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" className="text-foreground">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Get Started</Button>
-            </Link>
+            {token ? (
+              <Link href="/profile">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Profile</Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-foreground">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -272,7 +286,7 @@ export default function HomePage() {
                 <Card className="hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer overflow-hidden border-border bg-card">
                   <div className="aspect-square relative overflow-hidden bg-muted">
                     <img
-                      src={provider.image || "/placeholder.svg"}
+                      src={provider.image || '/placeholder.svg'}
                       alt={provider.name}
                       className="w-full h-full object-cover"
                     />
@@ -449,5 +463,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

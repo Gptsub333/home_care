@@ -31,14 +31,15 @@ const handleSubmit = async (e) => {
     });
 
     const data = await res.json();
-
     if (!res.ok) {
-      alert(data.message || "Login failed");
+      alert(data.message || 'Login failed');
       return;
     }
 
-    // ✅ No need for localStorage now
-    router.push("/");
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    document.cookie = `token=${data.token}; path=/;`;
+    router.push('/profile');
   } catch (error) {
     console.error("Login error:", error);
     alert("Something went wrong");
