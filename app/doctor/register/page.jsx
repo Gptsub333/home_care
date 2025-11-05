@@ -8,18 +8,18 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 export default function DoctorRegisterPage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
-    // Personal Info
     name: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    // Professional Info
     specialty: "",
     licenseId: "",
     npiNumber: "",
@@ -27,32 +27,47 @@ export default function DoctorRegisterPage() {
     county: "",
     yearsOfExperience: "",
     qualifications: "",
-    // Additional Info
     bio: "",
     servicesOffered: "",
     consultationFee: "",
     address: "",
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (step < 3) {
-      setStep(step + 1)
-    } else {
-      console.log("Provider registration:", formData)
-      // In production, this would submit to API for verification
-      router.push("/dashboard/doctor")
-    }
+  const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  if (step < 3) {
+    setStep(step + 1)
+    return
   }
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1)
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/register/provider`,
+      formData,
+      { headers: { "Content-Type": "application/json" },
+     credentials: "include" },
+     
+    )
+
+    if (res.status === 201) {
+      toast.success("Provider registered! Wait for approval & login.")
+      
+      // ❗️Provider should login manually (NO token save here)
+      router.push("/doctor/login")
     }
+  } catch (error) {
+    toast.error(error.response?.data?.error || "Registration failed. Try again.")
+  }
+}
+
+
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 py-12 px-4">
+     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 py-12 px-4">
       <div className="container mx-auto max-w-3xl">
         <Link
           href="/"

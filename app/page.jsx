@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { AutocompleteInput } from "@/components/autocomplete-input"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { AutocompleteInput } from "@/components/autocomplete-input";
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 
@@ -84,23 +84,31 @@ export default function HomePage() {
   ]
 
   const handleSearch = (e) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    if (specialty) params.set("specialty", specialty)
-    if (location) params.set("location", location)
-    window.location.href = `/search?${params.toString()}`
-  }
-  const handleLogout = async () => {
-  
-  const res = await fetch("http://localhost:5000/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
-  if(res.ok){
-    alert("Logged out successfully"); 
-    router.push("/login");
-  }
+  e.preventDefault();
+  const params = new URLSearchParams();
+  if (specialty) params.set("specialty", specialty);
+  if (location) params.set("location", location);
+  router.push(`/search?${params.toString()}`);
 };
+
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
 
   return (
     <div className="min-h-screen">
@@ -132,18 +140,46 @@ export default function HomePage() {
             <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
               Contact
             </Link>
-            <LogoutButton />
+            {/* <LogoutButton /> */}
           </nav>
 
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" className="text-foreground">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Get Started</Button>
-            </Link>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={toggleDropdown}
+              aria-haspopup="true"
+              aria-expanded={dropdownOpen}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-md hover:bg-primary/90 transition"
+              title="User menu"
+            >
+              {/* Profile icon SVG or image */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5.121 17.804A9 9 0 1118.88 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-36 bg-white border border-border rounded-md shadow-lg z-50">
+                <Link
+                  href="profile"
+                  className="block px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                  onClick={() => setDropdownOpen(false)}
+                >
+                  Profile
+                </Link>
+                <LogoutButton />
+              </div>
+            )}
           </div>
         </div>
       </header>

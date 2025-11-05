@@ -7,23 +7,42 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import axios from "axios"
+import { toast } from "react-toastify"
+import Cookies from "js-cookie"
 
-export default function DoctorLoginPage() {
+export default function ProviderLoginPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Doctor login attempt:", formData)
-    // Redirect to doctor dashboard
-    router.push("/dashboard/doctor")
+    try {
+      const res = await axios.post(
+        "https://home-care-backend.onrender.com/api/auth/login",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      )
+      
+      if (res.status === 200) {
+        toast.success("Login successful!")
+        
+        // ✅ Save token & role in cookie for middleware
+        Cookies.set("token", res.data.token, { expires: 7 })
+        Cookies.set("role", "provider", { expires: 7 }) // force provider role here
+        
+        router.push("/dashboard/doctor")
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Invalid email or password")
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
+     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link
           href="/"
