@@ -15,12 +15,32 @@ export default function DoctorLoginPage() {
     password: "",
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Doctor login attempt:", formData)
-    // Redirect to doctor dashboard
-    router.push("/dashboard/doctor")
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include', // ✅ required for cookies
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || 'Login failed');
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', 'doctor');
+      localStorage.setItem('user', JSON.stringify(data.user));
+      document.cookie = `token=${data.token}; path=/;`;
+      router.push('/profile');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Something went wrong');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">

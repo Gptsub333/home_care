@@ -37,9 +37,10 @@ const handleSubmit = async (e) => {
     }
 
     localStorage.setItem('token', data.token);
+    localStorage.setItem('role', 'patient');
     localStorage.setItem('user', JSON.stringify(data.user));
     document.cookie = `token=${data.token}; path=/;`;
-    router.push('/profile');
+    router.push('/');
   } catch (error) {
     console.error("Login error:", error);
     alert("Something went wrong");

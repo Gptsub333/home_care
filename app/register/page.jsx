@@ -29,6 +29,9 @@ export default function RegisterPage() {
       if (res.status === 201) {
         console.log(res);
         toast.success('Registration successful! Redirecting to dashboard...');
+    
+        localStorage.setItem('role', 'patient');
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         localStorage.setItem('token', res.data.token);
         router.push('/dashboard/patient');
       }

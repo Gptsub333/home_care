@@ -8,48 +8,58 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export default function DoctorRegisterPage() {
-  const router = useRouter()
-  const [step, setStep] = useState(1)
+  const router = useRouter();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Personal Info
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
     // Professional Info
-    specialty: "",
-    licenseId: "",
-    npiNumber: "",
-    credentials: "",
-    county: "",
-    yearsOfExperience: "",
-    qualifications: "",
+    specialty: '',
+    licenseId: '',
+    npiNumber: '',
+    credentials: '',
+    county: '',
+    yearsOfExperience: '',
+    qualifications: '',
     // Additional Info
-    bio: "",
-    servicesOffered: "",
-    consultationFee: "",
-    address: "",
-  })
+    bio: '',
+    servicesOffered: '',
+    consultationFee: '',
+    address: '',
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (step < 3) {
-      setStep(step + 1)
+      setStep(step + 1);
     } else {
-      console.log("Provider registration:", formData)
-      // In production, this would submit to API for verification
-      router.push("/dashboard/doctor")
+      try {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/register/provider`, formData);
+        if (res.status === 201) {
+          localStorage.setItem('token', res.data.token);
+          localStorage.setItem('role', 'doctor');
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+          router.push('/profile');
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+      }
     }
-  }
+  };
 
   const handleBack = () => {
     if (step > 1) {
-      setStep(step - 1)
+      setStep(step - 1);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 py-12 px-4">
@@ -89,12 +99,12 @@ export default function DoctorRegisterPage() {
                 <div key={s} className="flex items-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                      step >= s ? "bg-gradient-to-br from-blue-500 to-teal-500 text-white" : "bg-gray-200 text-gray-500"
+                      step >= s ? 'bg-gradient-to-br from-blue-500 to-teal-500 text-white' : 'bg-gray-200 text-gray-500'
                     }`}
                   >
                     {s}
                   </div>
-                  {s < 3 && <div className={`w-12 h-1 ${step > s ? "bg-teal-500" : "bg-gray-200"}`} />}
+                  {s < 3 && <div className={`w-12 h-1 ${step > s ? 'bg-teal-500' : 'bg-gray-200'}`} />}
                 </div>
               ))}
             </div>
@@ -523,7 +533,7 @@ export default function DoctorRegisterPage() {
                   <div className="flex items-start gap-2">
                     <input type="checkbox" className="mt-1 rounded border-gray-300" required />
                     <p className="text-sm text-gray-600">
-                      I certify that all information provided is accurate and I agree to the{" "}
+                      I certify that all information provided is accurate and I agree to the{' '}
                       <Link href="/terms" className="text-blue-600 hover:underline">
                         Provider Terms of Service
                       </Link>
@@ -547,16 +557,16 @@ export default function DoctorRegisterPage() {
                 <Button
                   type="submit"
                   className={`h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600 ${
-                    step === 1 ? "w-full" : "flex-1"
+                    step === 1 ? 'w-full' : 'flex-1'
                   }`}
                 >
-                  {step < 3 ? "Continue" : "Submit Application"}
+                  {step < 3 ? 'Continue' : 'Submit Application'}
                 </Button>
               </div>
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Already have a provider account?{" "}
+              Already have a provider account?{' '}
               <Link href="/doctor/login" className="text-blue-600 font-semibold hover:underline">
                 Sign in
               </Link>
@@ -565,5 +575,5 @@ export default function DoctorRegisterPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
