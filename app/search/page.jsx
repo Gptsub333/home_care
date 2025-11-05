@@ -644,8 +644,8 @@ export default function SearchPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {providers.map((provider) => (
                 <Link
-                  key={provider._id || provider.id}
-                  href={`/provider/${provider._id || provider.id}`}
+                  key={provider.userId}
+                  href={`/provider/${provider.userId}`}
                 >
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                     <CardContent className="p-6">
@@ -687,7 +687,7 @@ export default function SearchPage() {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="h-4 w-4" />
                           <span>
-                            {provider.experience || 0} years experience
+                            {provider.yearsOfExperience || 0} years experience
                           </span>
                         </div>
 
@@ -701,7 +701,7 @@ export default function SearchPage() {
                         <div className="flex items-center gap-2 text-sm">
                           <DollarSign className="h-4 w-4 text-muted-foreground" />
                           <span className="font-semibold">
-                            ₹{provider.price}
+                            ₹{provider.charges}
                           </span>
                           <span className="text-muted-foreground">
                             per visit
@@ -711,7 +711,7 @@ export default function SearchPage() {
 
                       {/* Services */}
                       <div className="flex flex-wrap gap-2 mt-4">
-                        {provider.services?.slice(0, 3).map((service, idx) => (
+                        {provider.services?.split(",").map((service, idx) => (
                           <Badge
                             key={idx}
                             variant="secondary"

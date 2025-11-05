@@ -252,12 +252,15 @@ export default function ProviderProfilePage() {
     async function fetchProvider() {
       setLoading(true);
       try {
-        const res = await fetch(`https://home-care-backend.onrender.com/api/providers/${id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await fetch(
+          `https://home-care-backend.onrender.com/api/providers/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!res.ok) {
           throw new Error("Failed to fetch provider");
@@ -380,7 +383,7 @@ export default function ProviderProfilePage() {
                           {provider.name}
                         </h1>
                         <p className="text-lg text-muted-foreground mb-3">
-                          {mockProvider.specialty}
+                          {provider?.specialty}
                         </p>
                         <div className="flex items-center justify-center md:justify-start gap-4 flex-wrap">
                           <div className="flex items-center gap-1">
@@ -420,7 +423,10 @@ export default function ProviderProfilePage() {
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                       <MapPinIcon className="h-4 w-4 text-teal-600" />
-                      <span>{provider.location}</span>
+                      {/* <span>{provider.location}</span> */}
+                      <span>
+                        {provider.city}, {provider.state}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -430,7 +436,7 @@ export default function ProviderProfilePage() {
             {/* Tabs */}
             <Tabs defaultValue="about" className="w-full">
               <TabsList className="w-full justify-start bg-white border border-teal-100">
-                {/* <TabsTrigger
+                <TabsTrigger
                   value="about"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
                 >
@@ -441,7 +447,7 @@ export default function ProviderProfilePage() {
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
                 >
                   Services
-                </TabsTrigger> */}
+                </TabsTrigger>
                 <TabsTrigger
                   value="reviews"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
@@ -450,7 +456,7 @@ export default function ProviderProfilePage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* <TabsContent value="about" className="mt-6">
+              <TabsContent value="about" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6 space-y-6">
                     <div>
@@ -458,50 +464,53 @@ export default function ProviderProfilePage() {
                         About
                       </h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        {mockProvider.about}
+                        {provider.bio}
                       </p>
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-3 text-teal-700">
                         Education & Credentials
                       </h3>
-                      <ul className="space-y-2">
+                      <p className="text-muted-foreground leading-relaxed">
+                        {provider.qualifications}
+                      </p>
+                      {/* <ul className="space-y-2">
                         {mockProvider.education.map((edu, idx) => (
                           <li key={idx} className="flex items-start gap-2">
                             <AwardIcon className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
                             <span className="text-muted-foreground">{edu}</span>
                           </li>
                         ))}
-                      </ul>
+                      </ul> */}
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent> */}
+              </TabsContent>
 
-              {/* <TabsContent value="services" className="mt-6">
+              <TabsContent value="services" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6">
                     <h3 className="text-xl font-semibold mb-4 text-teal-700">
                       Services Offered
                     </h3>
                     <div className="space-y-4">
-                      {mockProvider.services.map((service, idx) => (
+                      {provider?.servicesOffered?.split(",").map((service, idx) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
                         >
                           <div>
                             <h4 className="font-semibold mb-1">
-                              {service.name}
+                              {service}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            {/* <p className="text-sm text-muted-foreground">
                               <ClockIcon className="h-3 w-3 inline mr-1 text-teal-600" />
                               {service.duration}
-                            </p>
+                            </p> */}
                           </div>
                           <div className="text-right">
                             <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
-                              ${service.price}
+                              ${provider.consultationFee}
                             </p>
                           </div>
                         </div>
@@ -509,7 +518,7 @@ export default function ProviderProfilePage() {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent> */}
+              </TabsContent>
 
               <TabsContent value="reviews" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
