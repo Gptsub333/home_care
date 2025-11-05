@@ -35,7 +35,7 @@ export default function DoctorLoginPage() {
       localStorage.setItem('role', 'doctor');
       localStorage.setItem('user', JSON.stringify(data.user));
       document.cookie = `token=${data.token}; path=/;`;
-      router.push('/profile');
+      router.push('/dashboard/doctor');
     } catch (error) {
       console.error('Login error:', error);
       alert('Something went wrong');

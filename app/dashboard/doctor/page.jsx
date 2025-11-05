@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState } from "react"
+import { useState } from 'react';
 import {
   Calendar,
   Clock,
@@ -12,70 +12,70 @@ import {
   Settings,
   LogOut,
   Home,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from 'next/link';
 
 const mockTodayAppointments = [
   {
     id: 1,
-    patient: "John Doe",
-    service: "General Consultation",
-    time: "10:00 AM",
-    status: "confirmed",
-    address: "123 Main St, Manhattan",
+    patient: 'John Doe',
+    service: 'General Consultation',
+    time: '10:00 AM',
+    status: 'confirmed',
+    address: '123 Main St, Manhattan',
   },
   {
     id: 2,
-    patient: "Maria Smith",
-    service: "Follow-up Visit",
-    time: "2:00 PM",
-    status: "confirmed",
-    address: "456 Park Ave, Brooklyn",
+    patient: 'Maria Smith',
+    service: 'Follow-up Visit',
+    time: '2:00 PM',
+    status: 'confirmed',
+    address: '456 Park Ave, Brooklyn',
   },
-]
+];
 
 const mockUpcomingAppointments = [
   {
     id: 3,
-    patient: "David Lee",
-    service: "Comprehensive Physical",
-    date: "2024-01-26",
-    time: "11:00 AM",
-    status: "pending",
+    patient: 'David Lee',
+    service: 'Comprehensive Physical',
+    date: '2024-01-26',
+    time: '11:00 AM',
+    status: 'pending',
   },
   {
     id: 4,
-    patient: "Sarah Johnson",
-    service: "Urgent Care",
-    date: "2024-01-27",
-    time: "3:00 PM",
-    status: "confirmed",
+    patient: 'Sarah Johnson',
+    service: 'Urgent Care',
+    date: '2024-01-27',
+    time: '3:00 PM',
+    status: 'confirmed',
   },
-]
+];
 
 const mockReviews = [
   {
     id: 1,
-    patient: "John D.",
+    patient: 'John D.',
     rating: 5,
-    date: "2 days ago",
-    comment: "Excellent service! Very professional and caring.",
+    date: '2 days ago',
+    comment: 'Excellent service! Very professional and caring.',
   },
   {
     id: 2,
-    patient: "Maria S.",
+    patient: 'Maria S.',
     rating: 5,
-    date: "1 week ago",
-    comment: "Great experience. Highly recommend!",
+    date: '1 week ago',
+    comment: 'Great experience. Highly recommend!',
   },
-]
+];
 
 export default function DoctorDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,49 +87,49 @@ export default function DoctorDashboard() {
           </Link>
           <nav className="space-y-2">
             <Button
-              variant={activeTab === "overview" ? "default" : "ghost"}
+              variant={activeTab === 'overview' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("overview")}
+              onClick={() => setActiveTab('overview')}
             >
               <Home className="h-4 w-4 mr-2" />
               Overview
             </Button>
             <Button
-              variant={activeTab === "appointments" ? "default" : "ghost"}
+              variant={activeTab === 'appointments' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("appointments")}
+              onClick={() => setActiveTab('appointments')}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Appointments
             </Button>
             <Button
-              variant={activeTab === "earnings" ? "default" : "ghost"}
+              variant={activeTab === 'earnings' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("earnings")}
+              onClick={() => setActiveTab('earnings')}
             >
               <DollarSign className="h-4 w-4 mr-2" />
               Earnings
             </Button>
             <Button
-              variant={activeTab === "reviews" ? "default" : "ghost"}
+              variant={activeTab === 'reviews' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("reviews")}
+              onClick={() => setActiveTab('reviews')}
             >
               <Star className="h-4 w-4 mr-2" />
               Reviews
             </Button>
             <Button
-              variant={activeTab === "messages" ? "default" : "ghost"}
+              variant={activeTab === 'messages' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("messages")}
+              onClick={() => setActiveTab('messages')}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Messages
             </Button>
             <Button
-              variant={activeTab === "settings" ? "default" : "ghost"}
+              variant={activeTab === 'settings' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("settings")}
+              onClick={() => setActiveTab('settings')}
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -154,14 +154,16 @@ export default function DoctorDashboard() {
                 <h1 className="text-3xl font-serif font-bold mb-2">Doctor Dashboard</h1>
                 <p className="text-muted-foreground">Welcome back, Dr. Johnson</p>
               </div>
-              <Avatar className="h-12 w-12">
-                <AvatarImage src="/professional-female-doctor.png" />
-                <AvatarFallback>SJ</AvatarFallback>
-              </Avatar>
+              <Link href="/profile">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src="/professional-female-doctor.png" />
+                  <AvatarFallback>SJ</AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
 
             {/* Overview Tab */}
-            {activeTab === "overview" && (
+            {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Stats */}
                 <div className="grid md:grid-cols-4 gap-6">
@@ -222,9 +224,9 @@ export default function DoctorDashboard() {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
                             {apt.patient
-                              .split(" ")
+                              .split(' ')
                               .map((n) => n[0])
-                              .join("")}
+                              .join('')}
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">{apt.patient}</h4>
@@ -274,7 +276,7 @@ export default function DoctorDashboard() {
             )}
 
             {/* Appointments Tab */}
-            {activeTab === "appointments" && (
+            {activeTab === 'appointments' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -286,9 +288,9 @@ export default function DoctorDashboard() {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
                             {apt.patient
-                              .split(" ")
+                              .split(' ')
                               .map((n) => n[0])
-                              .join("")}
+                              .join('')}
                           </div>
                           <div>
                             <h4 className="font-semibold mb-1">{apt.patient}</h4>
@@ -319,7 +321,7 @@ export default function DoctorDashboard() {
             )}
 
             {/* Earnings Tab */}
-            {activeTab === "earnings" && (
+            {activeTab === 'earnings' && (
               <div className="space-y-6">
                 <div className="grid md:grid-cols-3 gap-6">
                   <Card>
@@ -354,7 +356,7 @@ export default function DoctorDashboard() {
             )}
 
             {/* Reviews Tab */}
-            {activeTab === "reviews" && (
+            {activeTab === 'reviews' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -395,7 +397,7 @@ export default function DoctorDashboard() {
             )}
 
             {/* Messages Tab */}
-            {activeTab === "messages" && (
+            {activeTab === 'messages' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -409,7 +411,7 @@ export default function DoctorDashboard() {
             )}
 
             {/* Settings Tab */}
-            {activeTab === "settings" && (
+            {activeTab === 'settings' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -467,5 +469,5 @@ export default function DoctorDashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }

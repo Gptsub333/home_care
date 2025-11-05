@@ -71,7 +71,7 @@ export default function ProfileDetailPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span>Back to home</span>
+            <span>Back to Dashboard</span>
           </button>
 
           <Button onClick={handleLogout} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">

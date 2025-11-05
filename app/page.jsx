@@ -11,6 +11,7 @@ export default function HomePage() {
   const [specialty, setSpecialty] = React.useState('');
   const [location, setLocation] = React.useState('');
   const [token, setToken] = React.useState(null);
+  const [role, setRole] = React.useState(null);
   const router = useRouter();
 
   const providerTypes = [
@@ -102,8 +103,12 @@ export default function HomePage() {
 
   React.useEffect(() => {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     if (token) {
       setToken(token);
+    }
+    if (role) {
+      setRole(role);
     }
   }, []);
 
@@ -142,8 +147,8 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3">
             {token ? (
-              <Link href="/profile">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Profile</Button>
+              <Link href={`${role === 'doctor' ? '/dashboard/doctor' : '/dashboard/patient'}`}>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Dashboard</Button>
               </Link>
             ) : (
               <>
