@@ -5,10 +5,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { AutocompleteInput } from "@/components/autocomplete-input"
+import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
+
 
 export default function HomePage() {
   const [specialty, setSpecialty] = useState("")
   const [location, setLocation] = useState("")
+  const router = useRouter();
 
   const providerTypes = [
     "Physical Therapist",
@@ -86,6 +90,17 @@ export default function HomePage() {
     if (location) params.set("location", location)
     window.location.href = `/search?${params.toString()}`
   }
+  const handleLogout = async () => {
+  
+  const res = await fetch("http://localhost:5000/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  if(res.ok){
+    alert("Logged out successfully"); 
+    router.push("/login");
+  }
+};
 
   return (
     <div className="min-h-screen">
@@ -117,6 +132,7 @@ export default function HomePage() {
             <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
               Contact
             </Link>
+            <LogoutButton />
           </nav>
 
           <div className="flex items-center gap-3">

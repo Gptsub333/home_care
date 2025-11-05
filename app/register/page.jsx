@@ -7,24 +7,35 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    age: "",
-    address: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  })
+    name: '',
+    email: '',
+    age: '',
+    address: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Registration attempt:", formData)
-    router.push("/dashboard/patient")
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/register`, formData);
+      if (res.status === 201) {
+        console.log(res);
+        toast.success('Registration successful! Redirecting to dashboard...');
+        localStorage.setItem('token', res.data.token);
+        router.push('/dashboard/patient');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+    }
+  };
 
   const detectLocation = () => {
     if (navigator.geolocation) {
@@ -32,10 +43,10 @@ export default function RegisterPage() {
         setFormData({
           ...formData,
           address: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`,
-        })
-      })
+        });
+      });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 py-12 px-4">
@@ -288,11 +299,11 @@ export default function RegisterPage() {
               <div className="flex items-start gap-2">
                 <input type="checkbox" className="mt-1 rounded border-gray-300" required />
                 <p className="text-sm text-gray-600">
-                  I agree to the{" "}
+                  I agree to the{' '}
                   <Link href="/terms" className="text-teal-600 hover:underline">
                     Terms of Service
-                  </Link>{" "}
-                  and{" "}
+                  </Link>{' '}
+                  and{' '}
                   <Link href="/privacy" className="text-teal-600 hover:underline">
                     Privacy Policy
                   </Link>
@@ -308,7 +319,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link href="/login" className="text-teal-600 font-semibold hover:underline">
                 Sign in
               </Link>
@@ -324,5 +335,5 @@ export default function RegisterPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
