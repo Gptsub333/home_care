@@ -129,6 +129,18 @@ export default function PatientDashboard() {
     setLoading(false);
   };
 
+    const handleLogout = () => {
+      // Clear localStorage
+      localStorage.removeItem('user');
+      localStorage.removeItem('token'); // if you store token separately
+      localStorage.removeItem('role');
+      // Redirect to login
+      window.location.href = '/login';
+      // Clear cookie
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    };
+
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
@@ -142,49 +154,49 @@ export default function PatientDashboard() {
           </Link>
           <nav className="space-y-2">
             <Button
-              variant={activeTab === "overview" ? "default" : "ghost"}
+              variant={activeTab === 'overview' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("overview")}
+              onClick={() => setActiveTab('overview')}
             >
               <Home className="h-4 w-4 mr-2" />
               Overview
             </Button>
             <Button
-              variant={activeTab === "appointments" ? "default" : "ghost"}
+              variant={activeTab === 'appointments' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("appointments")}
+              onClick={() => setActiveTab('appointments')}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Appointments
             </Button>
             <Button
-              variant={activeTab === "favorites" ? "default" : "ghost"}
+              variant={activeTab === 'favorites' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("favorites")}
+              onClick={() => setActiveTab('favorites')}
             >
               <Heart className="h-4 w-4 mr-2" />
               Favorites
             </Button>
             <Button
-              variant={activeTab === "records" ? "default" : "ghost"}
+              variant={activeTab === 'records' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("records")}
+              onClick={() => setActiveTab('records')}
             >
               <FileText className="h-4 w-4 mr-2" />
               Medical Records
             </Button>
             <Button
-              variant={activeTab === "messages" ? "default" : "ghost"}
+              variant={activeTab === 'messages' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("messages")}
+              onClick={() => setActiveTab('messages')}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Messages
             </Button>
             <Button
-              variant={activeTab === "settings" ? "default" : "ghost"}
+              variant={activeTab === 'settings' ? 'default' : 'ghost'}
               className="w-full justify-start"
-              onClick={() => setActiveTab("settings")}
+              onClick={() => setActiveTab('settings')}
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -197,15 +209,13 @@ export default function PatientDashboard() {
                 Find Providers
               </Button>
             </Link>
-            <Link href="/login">
-              <Button
-                variant="ghost"
+            <Button
+                onClick={handleLogout} variant="ghost"
                 className="w-full justify-start text-muted-foreground"
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            </Link>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </aside>
 
@@ -227,7 +237,7 @@ export default function PatientDashboard() {
             </div>
 
             {/* Overview Tab */}
-            {activeTab === "overview" && (
+            {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Stats */}
                 <div className="grid md:grid-cols-3 gap-6">
@@ -285,7 +295,7 @@ export default function PatientDashboard() {
                       >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={apt.image || "/placeholder.svg"}
+                            src={apt.image || '/placeholder.svg'}
                             alt={apt.provider}
                             fill
                             className="object-cover"
@@ -323,7 +333,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Appointments Tab */}
-            {activeTab === "appointments" && (
+            {activeTab === 'appointments' && (
               <div className="space-y-6">
                 <Tabs defaultValue="upcoming">
                   <TabsList>
@@ -337,7 +347,7 @@ export default function PatientDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
                               <Image
-                                src={apt.image || "/placeholder.svg"}
+                                src={apt.image || '/placeholder.svg'}
                                 alt={apt.provider}
                                 fill
                                 className="object-cover"
@@ -381,7 +391,7 @@ export default function PatientDashboard() {
                           <div className="flex items-center gap-4">
                             <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
                               <Image
-                                src={apt.image || "/placeholder.svg"}
+                                src={apt.image || '/placeholder.svg'}
                                 alt={apt.provider}
                                 fill
                                 className="object-cover"
@@ -420,7 +430,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Favorites Tab */}
-            {activeTab === "favorites" && (
+            {activeTab === 'favorites' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -434,7 +444,7 @@ export default function PatientDashboard() {
                       >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={fav.image || "/placeholder.svg"}
+                            src={fav.image || '/placeholder.svg'}
                             alt={fav.name}
                             fill
                             className="object-cover"
@@ -461,7 +471,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Medical Records Tab */}
-            {activeTab === "records" && (
+            {activeTab === 'records' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -477,7 +487,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Messages Tab */}
-            {activeTab === "messages" && (
+            {activeTab === 'messages' && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -493,7 +503,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Settings Tab */}
-            {activeTab === "settings" && (
+            {activeTab === 'settings' && (
               // <div className="space-y-6">
               //   <Card>
               //     <CardHeader>

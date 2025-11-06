@@ -30,25 +30,31 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        toast.error(data.error || data.message || "Login failed");
+        toast.error(data.error || data.message || 'Login failed');
         setIsLoading(false);
         return;
       }
 
-      toast.success("Login successful!");
-      
-      // Redirect and refresh to trigger middleware
-      router.push("/");
-      router.refresh();
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', 'patient');
+    localStorage.setItem('user', JSON.stringify(data.user));
+    document.cookie = `token=${data.token}; path=/;`;
+    router.push('/');
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong");
+  }
+};
 
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Something went wrong. Please try again.");
-      setIsLoading(false);
-    }
-  };
+const handleLogout = async () => {
+  await fetch("http://localhost:5000/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  });
+  router.push("/login");
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
