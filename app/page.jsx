@@ -169,16 +169,17 @@ export default function HomePage() {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-36 bg-white border border-border rounded-md shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-border rounded-md shadow-lg z-50">
                 <Link
                   href="profile"
-                  className="block px-4 py-2 text-sm text-foreground hover:bg-primary/10"
+                  className="block px-10 py-4 text-sm text-foreground hover:bg-primary/10"
                   onClick={() => setDropdownOpen(false)}
                 >
                   Profile
                 </Link>
                 <LogoutButton />
               </div>
+          
             )}
           </div>
         </div>

@@ -53,7 +53,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link
+        {/* <Link
           href="/"
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
         >
@@ -61,7 +61,7 @@ export default function LoginPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span>Back to home</span>
-        </Link>
+        </Link> */}
 
         <Card className="shadow-xl border-gray-200 bg-white">
           <CardHeader className="text-center pb-8">
