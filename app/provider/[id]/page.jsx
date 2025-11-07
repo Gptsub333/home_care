@@ -380,7 +380,7 @@ export default function ProviderProfilePage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-teal-200 hover:bg-teal-50 bg-transparent"
+                  className="border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
                 >
                   Sign In
                 </Button>
@@ -759,7 +759,7 @@ export default function ProviderProfilePage() {
                 <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
                   <DialogTrigger asChild>
                     <Button
-                      className="w-full mb-3 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+                      className="w-full mb-3 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
                       size="lg"
                     >
                       <CalendarIcon className="h-5 w-5 mr-2" />
@@ -831,7 +831,7 @@ export default function ProviderProfilePage() {
                               onClick={() => setSelectedTime(time)}
                               className={
                                 selectedTime === time
-                                  ? "bg-gradient-to-r from-teal-500 to-blue-500"
+                                  ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer"
                                   : ""
                               }
                             >
@@ -898,7 +898,7 @@ export default function ProviderProfilePage() {
                       )}
 
                       <Button
-                        className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600"
+                        className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
                         size="lg"
                         onClick={handleBooking}
                         disabled={!selectedService || !selectedTime}
@@ -912,7 +912,7 @@ export default function ProviderProfilePage() {
                 <Link href={`/messages/${mockProvider.id}`} className="block">
                   <Button
                     variant="outline"
-                    className="w-full border-teal-200 hover:bg-teal-50 bg-transparent"
+                    className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
                   >
                     <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
                     Send Message

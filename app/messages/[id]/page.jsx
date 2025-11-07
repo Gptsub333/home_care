@@ -128,7 +128,7 @@ export default function ChatPage() {
                 Dashboard
               </Link>
               <Link href="/login">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="cursor-pointer">
                   Sign In
                 </Button>
               </Link>
@@ -141,7 +141,7 @@ export default function ChatPage() {
       <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md">
         <div className="flex items-center gap-3">
           <Link href="/messages">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 cursor-pointer">
               <ArrowLeftIcon />
             </Button>
           </Link>
@@ -160,13 +160,13 @@ export default function ChatPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 cursor-pointer">
             <PhoneIcon />
           </Button>
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 cursor-pointer">
             <VideoIcon />
           </Button>
-          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+          <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 cursor-pointer">
             <MoreVerticalIcon />
           </Button>
         </div>
@@ -208,7 +208,7 @@ export default function ChatPage() {
             }}
             className="flex-1"
           />
-          <Button onClick={handleSendMessage} size="icon" className="bg-gradient-to-r from-teal-500 to-blue-500">
+          <Button onClick={handleSendMessage} size="icon" className="bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer">
             <SendIcon />
           </Button>
         </div>
