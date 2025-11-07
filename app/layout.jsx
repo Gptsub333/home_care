@@ -1,6 +1,7 @@
-import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
-import { ToastContainer } from "react-toastify";
+import { Inter, Playfair_Display } from "next/font/google"
+import "./globals.css"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,8 +25,14 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased">
         {children}
-        <ToastContainer />
+
+        {/* ✅ ToastContainer must be inside body */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          theme="light"
+        />
       </body>
     </html>
-  );
+  )
 }

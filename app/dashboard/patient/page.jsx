@@ -129,17 +129,28 @@ export default function PatientDashboard() {
     setLoading(false);
   };
 
-    const handleLogout = () => {
-      // Clear localStorage
-      localStorage.removeItem('user');
-      localStorage.removeItem('token'); // if you store token separately
-      localStorage.removeItem('role');
-      // Redirect to login
-      window.location.href = '/login';
-      // Clear cookie
-      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-    };
+  const handleLogout = async () => {
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
+    const role = localStorage.getItem('role');
 
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
+
+    // Clear cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -504,44 +515,6 @@ export default function PatientDashboard() {
 
             {/* Settings Tab */}
             {activeTab === 'settings' && (
-              // <div className="space-y-6">
-              //   <Card>
-              //     <CardHeader>
-              //       <CardTitle>Profile Settings</CardTitle>
-              //     </CardHeader>
-              //     <CardContent className="space-y-4">
-              //       <div>
-              //         <label className="text-sm font-medium mb-2 block">Full Name</label>
-              //         <input type="text" defaultValue="John Doe" className="w-full px-3 py-2 border rounded-md" />
-              //       </div>
-              //       <div>
-              //         <label className="text-sm font-medium mb-2 block">Email</label>
-              //         <input
-              //           type="email"
-              //           defaultValue="john@example.com"
-              //           className="w-full px-3 py-2 border rounded-md"
-              //         />
-              //       </div>
-              //       <div>
-              //         <label className="text-sm font-medium mb-2 block">Phone</label>
-              //         <input
-              //           type="tel"
-              //           defaultValue="+1 (555) 123-4567"
-              //           className="w-full px-3 py-2 border rounded-md"
-              //         />
-              //       </div>
-              //       <div>
-              //         <label className="text-sm font-medium mb-2 block">Address</label>
-              //         <input
-              //           type="text"
-              //           defaultValue="123 Main St, New York, NY 10001"
-              //           className="w-full px-3 py-2 border rounded-md"
-              //         />
-              //       </div>
-              //       <Button onClick={SaveProfileSetting}>Save Changes</Button>
-              //     </CardContent>
-              //   </Card>
-              // </div>
               <div className="space-y-6">
                 <Card>
                   <CardHeader>

@@ -1,18 +1,20 @@
-"use client";
+'use client';
 
-import { React, useState, useEffect } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AutocompleteInput } from "@/components/autocomplete-input";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { AutocompleteInput } from '@/components/autocomplete-input';
+import { useRouter } from 'next/navigation';
 import LogoutButton from "@/components/LogoutButton";
 
 export default function HomePage() {
-  const [specialty, setSpecialty] = useState("");
-  const [location, setLocation] = useState("");
-  const [token, setToken] = useState(null);
-  const [role, setRole] = useState(null);
+  const [specialty, setSpecialty] = React.useState('');
+  const [location, setLocation] = React.useState('');
+  const [token, setToken] = React.useState(null);
+  const [role, setRole] = React.useState(null);
+  const [user, setUser] = React.useState(null);
+  const [showDropdown, setShowDropdown] = React.useState(false);
   const router = useRouter();
 
   const providerTypes = [
@@ -92,26 +94,60 @@ export default function HomePage() {
     window.location.href = `/search?${params.toString()}`;
   };
   const handleLogout = async () => {
-    const res = await fetch("http://localhost:5000/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (res.ok) {
-      alert("Logged out successfully");
-      router.push("/login");
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
+
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
+
+    // Clear cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    const user = localStorage.getItem('user');
     if (token) {
       setToken(token);
     }
     if (role) {
       setRole(role);
     }
+    if (user) {
+      setUser(JSON.parse(user));
+    }
   }, []);
+
+
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
 
   return (
     <div className="min-h-screen">
@@ -164,34 +200,85 @@ export default function HomePage() {
             >
               Contact
             </Link>
-            <LogoutButton />
+            {/* <LogoutButton /> */}
           </nav>
 
           <div className="flex items-center gap-3">
-            {token ? (
-              <Link
-                href={`${
-                  role === "doctor" ? "/dashboard/doctor" : "/dashboard/patient"
-                }`}
-              >
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" className="text-foreground">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Get Started
-                  </Button>
-                </Link>
-              </>
-            )}
+            <div className="relative">
+              <button onClick={() => setShowDropdown(!showDropdown)} className="focus:outline-none">
+                <img
+                  src={user?.provider?.profileImage}
+                  alt="User Profile"
+                  className="w-10 h-10 rounded-full border-2 border-primary/30 hover:border-primary transition-all duration-300"
+                />
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg p-2 animate-fade-in z-50">
+                  {role === 'doctor' ? (
+                    <Link
+                      href="/dashboard/doctor"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-primary/10 hover:text-primary transition-all"
+                    >
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"
+                        />
+                      </svg>
+                      Dashboard
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-primary/10 hover:text-primary transition-all"
+                    >
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Profile
+                    </Link>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all"
+                  >
+                    <svg
+                      className="w-5 h-5 text-red-500"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"
+                      />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

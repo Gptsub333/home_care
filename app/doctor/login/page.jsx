@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 
-export default function DoctorLoginPage() {
+
+export default function ProviderLoginPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
@@ -43,7 +44,7 @@ export default function DoctorLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
+     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link
           href="/"

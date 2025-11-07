@@ -33,15 +33,26 @@ export default function ProfileDetailPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
+    const role = localStorage.getItem('role');
     // Clear localStorage
     localStorage.removeItem('user');
     localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
 
-    // Redirect to login
-    window.location.href = '/login';
     // Clear cookie
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
+    }
   };
 
   const navigateHome = () => {
@@ -71,7 +82,7 @@ export default function ProfileDetailPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span>Back to Dashboard</span>
+            <span>Back</span>
           </button>
 
           <Button onClick={handleLogout} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
@@ -314,7 +325,7 @@ export default function ProfileDetailPage() {
           )}
         </div>
 
-        {/* Edit Profile Button */}
+        {/* Edit Profile Button
         <div className="mt-6 text-center">
           <Button className="bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600 px-8">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,7 +338,7 @@ export default function ProfileDetailPage() {
             </svg>
             Edit Profile
           </Button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
