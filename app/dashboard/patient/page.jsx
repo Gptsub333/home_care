@@ -220,7 +220,10 @@ export default function PatientDashboard() {
                 Find Providers
               </Button>
             </Link>
-            <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground">
+            <Button
+                onClick={handleLogout} variant="ghost"
+                className="w-full justify-start text-muted-foreground"
+              >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -452,7 +455,7 @@ export default function PatientDashboard() {
                       >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={fav.image || "/placeholder.svg"}
+                            src={fav.image || '/placeholder.svg'}
                             alt={fav.name}
                             fill
                             className="object-cover"

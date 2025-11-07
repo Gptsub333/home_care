@@ -6,18 +6,19 @@ import "react-toastify/dist/ReactToastify.css"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-})
+});
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
-})
+});
 
 export const metadata = {
   title: "MediLux - Premium Healthcare at Home",
-  description: "Connect with verified healthcare professionals for luxury in-home medical services",
+  description:
+    "Connect with verified healthcare professionals for luxury in-home medical services",
   generator: "v0.app",
-}
+};
 
 export default function RootLayout({ children }) {
   return (
