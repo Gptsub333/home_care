@@ -1,17 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Search, MapPin, Star, Clock, DollarSign, SlidersHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import Link from "next/link"
-import Image from "next/image"
+import { useState, useEffect } from "react";
+import {
+  Search,
+  MapPin,
+  Star,
+  Clock,
+  DollarSign,
+  SlidersHorizontal,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import Link from "next/link";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 const mockProviders = [
   {
@@ -98,7 +112,7 @@ const mockProviders = [
     image: "/male-dentist.png",
     services: ["Dental Checkup", "Cleaning", "Emergency"],
   },
-]
+];
 
 const specialties = [
   "physical therapist ",
@@ -107,7 +121,7 @@ const specialties = [
   "Pediatrician",
   "Occupational Theripist",
   "Dentist",
-]
+];
 const allServices = [
   "Home Visit",
   "Consultation",
@@ -120,74 +134,139 @@ const allServices = [
   "Skin Treatment",
   "Cosmetic",
   "Dental Checkup",
-]
+];
 
 export default function SearchPage() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [location, setLocation] = useState("")
-  const [sortBy, setSortBy] = useState("rating")
-  const [filteredProviders, setFilteredProviders] = useState(mockProviders)
-  const [showFilters, setShowFilters] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [location, setLocation] = useState("");
+  const [sortBy, setSortBy] = useState("rating");
+  const [filteredProviders, setFilteredProviders] = useState(mockProviders);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filter states
-  const [selectedSpecialties, setSelectedSpecialties] = useState([])
-  const [priceRange, setPriceRange] = useState([0, 300])
-  const [minRating, setMinRating] = useState(0)
-  const [availableOnly, setAvailableOnly] = useState(false)
-  const [minExperience, setMinExperience] = useState(0)
-  const [selectedServices, setSelectedServices] = useState([])
+  const [selectedSpecialties, setSelectedSpecialties] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 300]);
+  const [minRating, setMinRating] = useState(0);
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [minExperience, setMinExperience] = useState(0);
+  const [selectedServices, setSelectedServices] = useState([]);
+
+  const [providers, setProviders] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const searchParams = useSearchParams();
+  const specialtyParam = searchParams.get("specialty") || "";
+  const locationParam = searchParams.get("location") || "";
+
+  // ✅ Unified fetch function
+  const fetchProviders = async ({ specialty, location, page = 1 }) => {
+    setLoading(true);
+    try {
+      const query = new URLSearchParams({
+        specialty: specialty || "",
+        location: location || "",
+        page,
+        limit: 9,
+      }).toString();
+
+      const res = await fetch(
+        `https://home-care-backend.onrender.com/api/providers/search?${query}`
+      );
+
+      const data = await res.json();
+      setProviders(data.providers || []);
+      setTotalPages(data.pagination?.totalPages || 1);
+    } catch (err) {
+      console.error("Error fetching providers:", err);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    let results = [...mockProviders]
+    fetchProviders({
+      specialty: specialtyParam,
+      location: locationParam,
+      page,
+    });
+  }, [specialtyParam, locationParam, page]);
+  
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setPage(1); // reset page on new search
+      fetchProviders({
+        specialty: searchTerm,
+        location: location,
+        page: 1,
+      });
+    }, 600);
+
+    return () => clearTimeout(delay);
+  }, [searchTerm, location]);
+
+  useEffect(() => {
+    let results = [...mockProviders];
 
     // Filter by search term
     if (searchTerm) {
       results = results.filter(
         (provider) =>
           provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          provider.specialty.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          provider.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     // Filter by location
     if (location) {
-      results = results.filter((provider) => provider.location.toLowerCase().includes(location.toLowerCase()))
+      results = results.filter((provider) =>
+        provider.location.toLowerCase().includes(location.toLowerCase())
+      );
     }
 
     if (selectedSpecialties.length > 0) {
-      results = results.filter((provider) => selectedSpecialties.includes(provider.specialty))
+      results = results.filter((provider) =>
+        selectedSpecialties.includes(provider.specialty)
+      );
     }
 
-    results = results.filter((provider) => provider.price >= priceRange[0] && provider.price <= priceRange[1])
+    results = results.filter(
+      (provider) =>
+        provider.price >= priceRange[0] && provider.price <= priceRange[1]
+    );
 
     if (minRating > 0) {
-      results = results.filter((provider) => provider.rating >= minRating)
+      results = results.filter((provider) => provider.rating >= minRating);
     }
 
     if (availableOnly) {
-      results = results.filter((provider) => provider.available)
+      results = results.filter((provider) => provider.available);
     }
 
     if (minExperience > 0) {
-      results = results.filter((provider) => provider.experience >= minExperience)
+      results = results.filter(
+        (provider) => provider.experience >= minExperience
+      );
     }
 
     if (selectedServices.length > 0) {
-      results = results.filter((provider) => selectedServices.some((service) => provider.services.includes(service)))
+      results = results.filter((provider) =>
+        selectedServices.some((service) => provider.services.includes(service))
+      );
     }
 
     // Sort results
     if (sortBy === "rating") {
-      results.sort((a, b) => b.rating - a.rating)
+      results.sort((a, b) => b.rating - a.rating);
     } else if (sortBy === "price-low") {
-      results.sort((a, b) => a.price - b.price)
+      results.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high") {
-      results.sort((a, b) => b.price - a.price)
+      results.sort((a, b) => b.price - a.price);
     } else if (sortBy === "experience") {
-      results.sort((a, b) => b.experience - a.experience)
+      results.sort((a, b) => b.experience - a.experience);
     }
 
-    setFilteredProviders(results)
+    setFilteredProviders(results);
   }, [
     searchTerm,
     location,
@@ -198,28 +277,34 @@ export default function SearchPage() {
     availableOnly,
     minExperience,
     selectedServices,
-  ])
+  ]);
 
   const clearAllFilters = () => {
-    setSearchTerm("")
-    setLocation("")
-    setSelectedSpecialties([])
-    setPriceRange([0, 300])
-    setMinRating(0)
-    setAvailableOnly(false)
-    setMinExperience(0)
-    setSelectedServices([])
-  }
+    setSearchTerm("");
+    setLocation("");
+    setSelectedSpecialties([]);
+    setPriceRange([0, 300]);
+    setMinRating(0);
+    setAvailableOnly(false);
+    setMinExperience(0);
+    setSelectedServices([]);
+  };
 
   const toggleSpecialty = (specialty) => {
     setSelectedSpecialties((prev) =>
-      prev.includes(specialty) ? prev.filter((s) => s !== specialty) : [...prev, specialty],
-    )
-  }
+      prev.includes(specialty)
+        ? prev.filter((s) => s !== specialty)
+        : [...prev, specialty]
+    );
+  };
 
   const toggleService = (service) => {
-    setSelectedServices((prev) => (prev.includes(service) ? prev.filter((s) => s !== service) : [...prev, service]))
-  }
+    setSelectedServices((prev) =>
+      prev.includes(service)
+        ? prev.filter((s) => s !== service)
+        : [...prev, service]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -227,17 +312,29 @@ export default function SearchPage() {
       <header className="border-b bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-serif font-bold text-primary">
+            <Link
+              href="/"
+              className="text-2xl font-serif font-bold text-primary"
+            >
               MediLux
             </Link>
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-sm hover:text-primary transition-colors">
+              <Link
+                href="/"
+                className="text-sm hover:text-primary transition-colors"
+              >
                 Home
               </Link>
-              <Link href="/search" className="text-sm hover:text-primary transition-colors">
+              <Link
+                href="/search"
+                className="text-sm hover:text-primary transition-colors"
+              >
                 Find Care
               </Link>
-              <Link href="/dashboard/patient" className="text-sm hover:text-primary transition-colors">
+              <Link
+                href="/dashboard/patient"
+                className="text-sm hover:text-primary transition-colors"
+              >
                 Dashboard
               </Link>
               <Link href="/login">
@@ -284,7 +381,11 @@ export default function SearchPage() {
                 <SelectItem value="experience">Most Experienced</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="md:hidden bg-transparent" onClick={() => setShowFilters(!showFilters)}>
+            <Button
+              variant="outline"
+              className="md:hidden bg-transparent"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -295,7 +396,11 @@ export default function SearchPage() {
       {/* Main Content with Sidebar */}
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row gap-8">
-          <aside className={`${showFilters ? "block" : "hidden"} md:block w-full md:w-80 flex-shrink-0`}>
+          <aside
+            className={`${
+              showFilters ? "block" : "hidden"
+            } md:block w-full md:w-80 flex-shrink-0`}
+          >
             <Card className="sticky top-24">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -316,13 +421,19 @@ export default function SearchPage() {
                     <h3 className="font-medium mb-3">Specialty</h3>
                     <div className="space-y-2">
                       {specialties.map((specialty) => (
-                        <div key={specialty} className="flex items-center space-x-2">
+                        <div
+                          key={specialty}
+                          className="flex items-center space-x-2"
+                        >
                           <Checkbox
                             id={specialty}
                             checked={selectedSpecialties.includes(specialty)}
                             onCheckedChange={() => toggleSpecialty(specialty)}
                           />
-                          <Label htmlFor={specialty} className="text-sm font-normal cursor-pointer">
+                          <Label
+                            htmlFor={specialty}
+                            className="text-sm font-normal cursor-pointer"
+                          >
                             {specialty}
                           </Label>
                         </div>
@@ -352,7 +463,10 @@ export default function SearchPage() {
                   {/* Rating Filter */}
                   <div>
                     <h3 className="font-medium mb-3">Minimum Rating</h3>
-                    <Select value={minRating.toString()} onValueChange={(val) => setMinRating(Number(val))}>
+                    <Select
+                      value={minRating.toString()}
+                      onValueChange={(val) => setMinRating(Number(val))}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Any rating" />
                       </SelectTrigger>
@@ -368,8 +482,15 @@ export default function SearchPage() {
                   {/* Availability Filter */}
                   <div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="available" checked={availableOnly} onCheckedChange={setAvailableOnly} />
-                      <Label htmlFor="available" className="text-sm font-medium cursor-pointer">
+                      <Checkbox
+                        id="available"
+                        checked={availableOnly}
+                        onCheckedChange={setAvailableOnly}
+                      />
+                      <Label
+                        htmlFor="available"
+                        className="text-sm font-medium cursor-pointer"
+                      >
                         Available Today Only
                       </Label>
                     </div>
@@ -378,7 +499,10 @@ export default function SearchPage() {
                   {/* Experience Filter */}
                   <div>
                     <h3 className="font-medium mb-3">Minimum Experience</h3>
-                    <Select value={minExperience.toString()} onValueChange={(val) => setMinExperience(Number(val))}>
+                    <Select
+                      value={minExperience.toString()}
+                      onValueChange={(val) => setMinExperience(Number(val))}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Any experience" />
                       </SelectTrigger>
@@ -396,13 +520,19 @@ export default function SearchPage() {
                     <h3 className="font-medium mb-3">Services</h3>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {allServices.map((service) => (
-                        <div key={service} className="flex items-center space-x-2">
+                        <div
+                          key={service}
+                          className="flex items-center space-x-2"
+                        >
                           <Checkbox
                             id={service}
                             checked={selectedServices.includes(service)}
                             onCheckedChange={() => toggleService(service)}
                           />
-                          <Label htmlFor={service} className="text-sm font-normal cursor-pointer">
+                          <Label
+                            htmlFor={service}
+                            className="text-sm font-normal cursor-pointer"
+                          >
                             {service}
                           </Label>
                         </div>
@@ -417,12 +547,16 @@ export default function SearchPage() {
           {/* Results */}
           <div className="flex-1">
             <div className="mb-6">
-              <h1 className="text-3xl font-serif font-bold mb-2">Healthcare Providers</h1>
-              <p className="text-muted-foreground">{filteredProviders.length} providers found</p>
+              <h1 className="text-3xl font-serif font-bold mb-2">
+                Healthcare Providers
+              </h1>
+              <p className="text-muted-foreground">
+                {providers.length} providers found
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredProviders.map((provider) => (
+            {/* <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {providers.map((provider) => (
                 <Link key={provider.id} href={`/provider/${provider.id}`}>
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                     <CardContent className="p-6">
@@ -436,14 +570,22 @@ export default function SearchPage() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1 truncate">{provider.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">{provider.specialty}</p>
+                          <h3 className="font-semibold text-lg mb-1 truncate">
+                            {provider.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {provider.specialty}
+                          </p>
                           <div className="flex items-center gap-2 text-sm">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium">{provider.rating}</span>
+                              <span className="font-medium">
+                                {provider.rating}
+                              </span>
                             </div>
-                            <span className="text-muted-foreground">({provider.reviews} reviews)</span>
+                            <span className="text-muted-foreground">
+                              ({provider.totalReviews} reviews)
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -461,14 +603,22 @@ export default function SearchPage() {
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-semibold">${provider.price}</span>
-                          <span className="text-muted-foreground">per visit</span>
+                          <span className="font-semibold">
+                            ${provider.price}
+                          </span>
+                          <span className="text-muted-foreground">
+                            per visit
+                          </span>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 mt-4">
                         {provider.services.slice(0, 3).map((service, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {service}
                           </Badge>
                         ))}
@@ -480,7 +630,106 @@ export default function SearchPage() {
                             Available Today
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Next Available: Tomorrow</Badge>
+                          <Badge variant="secondary">
+                            Next Available: Tomorrow
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div> */}
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {providers.map((provider) => (
+                <Link
+                  key={provider.userId}
+                  href={`/provider/${provider.userId}`}
+                >
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                    <CardContent className="p-6">
+                      {/* Top Profile Section */}
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
+                          <Image
+                            src={provider.image || "/doctor-placeholder.png"}
+                            alt={provider.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg mb-1 truncate">
+                            {provider.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {provider.specialty}
+                          </p>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-medium">
+                                {provider.rating || 0}
+                              </span>
+                            </div>
+                            <span className="text-muted-foreground">
+                              ({provider.totalReviews || 0} reviews)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>
+                            {provider.yearsOfExperience || 0} years experience
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span>
+                            {provider.location} • {provider.distance || "N/A"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-semibold">
+                            ₹{provider.charges}
+                          </span>
+                          <span className="text-muted-foreground">
+                            per visit
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Services */}
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {provider.services?.split(",").map((service, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {service}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      {/* Availability */}
+                      <div className="mt-4 pt-4 border-t">
+                        {provider.available ? (
+                          <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20">
+                            Available Today
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">Not Available</Badge>
                         )}
                       </div>
                     </CardContent>
@@ -489,17 +738,45 @@ export default function SearchPage() {
               ))}
             </div>
 
-            {filteredProviders.length === 0 && (
+            {providers.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">No providers found matching your criteria</p>
-                <Button variant="outline" className="mt-4 bg-transparent" onClick={clearAllFilters}>
+                <p className="text-muted-foreground text-lg">
+                  No providers found matching your criteria
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-4 bg-transparent"
+                  onClick={clearAllFilters}
+                >
                   Clear All Filters
                 </Button>
+
+                <div className="flex justify-center mt-8 gap-4">
+                  <Button
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => p - 1)}
+                    variant="outline"
+                  >
+                    Previous
+                  </Button>
+
+                  <span className="py-2 px-4 border rounded">
+                    Page {page} of {totalPages}
+                  </span>
+
+                  <Button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                    variant="outline"
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

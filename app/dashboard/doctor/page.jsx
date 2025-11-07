@@ -90,7 +90,6 @@ export default function CompleteSettingsPage() {
     email: '',
     phone: '',
     address: '',
-    age: '',
 
     // Provider fields
     specialty: '',
@@ -150,7 +149,6 @@ export default function CompleteSettingsPage() {
         email: data.email || '',
         phone: data.phone || '',
         address: data.address || '',
-        age: data.age || '',
 
         // Provider fields
         specialty: data.provider?.specialty || '',
@@ -751,16 +749,6 @@ export default function CompleteSettingsPage() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="h-12"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="age">Age</Label>
-                        <Input
-                          id="age"
-                          type="number"
-                          value={formData.age}
-                          onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                           className="h-12"
                         />
                       </div>

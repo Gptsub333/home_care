@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AutocompleteInput } from '@/components/autocomplete-input';
 import { useRouter } from 'next/navigation';
+import LogoutButton from "@/components/LogoutButton";
 
 export default function HomePage() {
   const [specialty, setSpecialty] = React.useState('');
@@ -129,6 +130,25 @@ export default function HomePage() {
     }
   }, []);
 
+
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -159,7 +179,7 @@ export default function HomePage() {
             <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
               Contact
             </Link>
-            <button onClick={handleLogout}>Log out</button>
+            {/* <LogoutButton /> */}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -291,7 +311,8 @@ export default function HomePage() {
                   />
                   <Button
                     type="submit"
-                    className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full md:w-auto font-semibold"
+                    className="h-12 px-8 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg w-full md:w-auto font-semibold"
+                    onClick={handleSearch}
                   >
                     Search
                   </Button>

@@ -8,9 +8,6 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { toast } from 'sonner';
-import axios from 'axios';
-
-const backendurl = "http://localhost:5000/api"; 
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +15,7 @@ export default function LoginPage() {
     email: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,7 +80,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link
+        {/* <Link
           href="/"
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
         >
@@ -90,7 +88,7 @@ export default function LoginPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span>Back to home</span>
-        </Link>
+        </Link> */}
 
         <Card className="shadow-xl border-gray-200 bg-white">
           <CardHeader className="text-center pb-8">
@@ -133,6 +131,7 @@ export default function LoginPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -163,6 +162,7 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -180,8 +180,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600"
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Calendar,
   Clock,
@@ -13,14 +13,14 @@ import {
   LogOut,
   Home,
   Search,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
-import Image from "next/image"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
+import Image from "next/image";
 
 const mockAppointments = [
   {
@@ -43,7 +43,7 @@ const mockAppointments = [
     image: "/male-cardiologist.jpg",
     location: "Home Visit - 123 Main St",
   },
-]
+];
 
 const mockPastAppointments = [
   {
@@ -56,7 +56,7 @@ const mockPastAppointments = [
     image: "/professional-female-nurse.png",
     location: "Home Visit - 123 Main St",
   },
-]
+];
 
 const mockFavorites = [
   {
@@ -73,10 +73,61 @@ const mockFavorites = [
     rating: 4.9,
     image: "/female-dermatologist.png",
   },
-]
+];
 
 export default function PatientDashboard() {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("overview");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [bio, setBio] = useState("");
+  const [consultationFee, setConsultationFee] = useState("");
+  const [servicesOffered, setServicesOffered] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const SaveProfileSetting = async () => {
+    setLoading(true);
+    try {
+      // const token = localStorage.getItem("token"); // your login token
+
+      const body = {
+        bio,
+        consultationFee: Number(consultationFee),
+        city,
+        state,
+        zipCode,
+        servicesOffered,
+        // profileImage: "" add UI later
+        isAvailableToday: true, // optional
+      };
+
+      const res = await fetch(
+        "https://home-care-backend.onrender.com/api/providers/profile",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message);
+
+      alert("Profile updated successfully!");
+      console.log("Updated Provider →", data.provider);
+    } catch (err) {
+      alert("Failed to update profile");
+      console.error(err);
+    }
+    setLoading(false);
+  };
 
   const handleLogout = async () => {
     // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
@@ -106,7 +157,10 @@ export default function PatientDashboard() {
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 border-r bg-card min-h-screen p-6 hidden lg:block">
-          <Link href="/" className="text-2xl font-serif font-bold text-primary mb-8 block">
+          <Link
+            href="/"
+            className="text-2xl font-serif font-bold text-primary mb-8 block"
+          >
             MediLux
           </Link>
           <nav className="space-y-2">
@@ -179,7 +233,9 @@ export default function PatientDashboard() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-serif font-bold mb-2">Patient Dashboard</h1>
+                <h1 className="text-3xl font-serif font-bold mb-2">
+                  Patient Dashboard
+                </h1>
                 <p className="text-muted-foreground">Welcome back, John</p>
               </div>
               <Avatar className="h-12 w-12">
@@ -197,7 +253,9 @@ export default function PatientDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Upcoming</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Upcoming
+                          </p>
                           <p className="text-3xl font-bold">2</p>
                         </div>
                         <Calendar className="h-8 w-8 text-primary" />
@@ -208,7 +266,9 @@ export default function PatientDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Completed</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Completed
+                          </p>
                           <p className="text-3xl font-bold">12</p>
                         </div>
                         <FileText className="h-8 w-8 text-primary" />
@@ -219,7 +279,9 @@ export default function PatientDashboard() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Favorites</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Favorites
+                          </p>
                           <p className="text-3xl font-bold">5</p>
                         </div>
                         <Heart className="h-8 w-8 text-primary" />
@@ -235,7 +297,10 @@ export default function PatientDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {mockAppointments.map((apt) => (
-                      <div key={apt.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div
+                        key={apt.id}
+                        className="flex items-center gap-4 p-4 border rounded-lg"
+                      >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
                             src={apt.image || '/placeholder.svg'}
@@ -246,7 +311,9 @@ export default function PatientDashboard() {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold mb-1">{apt.provider}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{apt.specialty}</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {apt.specialty}
+                          </p>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
@@ -295,8 +362,12 @@ export default function PatientDashboard() {
                               />
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-semibold mb-1">{apt.provider}</h3>
-                              <p className="text-muted-foreground mb-3">{apt.specialty}</p>
+                              <h3 className="text-xl font-semibold mb-1">
+                                {apt.provider}
+                              </h3>
+                              <p className="text-muted-foreground mb-3">
+                                {apt.specialty}
+                              </p>
                               <div className="flex flex-wrap gap-4 text-sm">
                                 <span className="flex items-center gap-1 text-muted-foreground">
                                   <Calendar className="h-4 w-4" />
@@ -335,8 +406,12 @@ export default function PatientDashboard() {
                               />
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-semibold mb-1">{apt.provider}</h3>
-                              <p className="text-muted-foreground mb-3">{apt.specialty}</p>
+                              <h3 className="text-xl font-semibold mb-1">
+                                {apt.provider}
+                              </h3>
+                              <p className="text-muted-foreground mb-3">
+                                {apt.specialty}
+                              </p>
                               <div className="flex flex-wrap gap-4 text-sm">
                                 <span className="flex items-center gap-1 text-muted-foreground">
                                   <Calendar className="h-4 w-4" />
@@ -371,16 +446,28 @@ export default function PatientDashboard() {
                   </CardHeader>
                   <CardContent className="grid md:grid-cols-2 gap-4">
                     {mockFavorites.map((fav) => (
-                      <div key={fav.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <div
+                        key={fav.id}
+                        className="flex items-center gap-4 p-4 border rounded-lg"
+                      >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                          <Image src={fav.image || '/placeholder.svg'} alt={fav.name} fill className="object-cover" />
+                          <Image
+                            src={fav.image || "/placeholder.svg"}
+                            alt={fav.name}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold mb-1">{fav.name}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">{fav.specialty}</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {fav.specialty}
+                          </p>
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">{fav.rating}</span>
+                            <span className="text-sm font-medium">
+                              {fav.rating}
+                            </span>
                           </div>
                         </div>
                         <Button size="sm">Book</Button>
@@ -399,7 +486,9 @@ export default function PatientDashboard() {
                     <CardTitle>Medical Records</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-center py-8">Your medical records will appear here</p>
+                    <p className="text-muted-foreground text-center py-8">
+                      Your medical records will appear here
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -413,7 +502,9 @@ export default function PatientDashboard() {
                     <CardTitle>Messages</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-center py-8">No messages yet</p>
+                    <p className="text-muted-foreground text-center py-8">
+                      No messages yet
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -426,36 +517,119 @@ export default function PatientDashboard() {
                   <CardHeader>
                     <CardTitle>Profile Settings</CardTitle>
                   </CardHeader>
+
                   <CardContent className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Full Name</label>
-                      <input type="text" defaultValue="John Doe" className="w-full px-3 py-2 border rounded-md" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Email</label>
-                      <input
-                        type="email"
-                        defaultValue="john@example.com"
-                        className="w-full px-3 py-2 border rounded-md"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Phone</label>
-                      <input
-                        type="tel"
-                        defaultValue="+1 (555) 123-4567"
-                        className="w-full px-3 py-2 border rounded-md"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Address</label>
+                      <label className="text-sm font-medium mb-2 block">
+                        Full Name
+                      </label>
                       <input
                         type="text"
-                        defaultValue="123 Main St, New York, NY 10001"
+                        value={name || "Dr. Sarah Smith"}
+                        onChange={(e) => setName(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
                       />
                     </div>
-                    <Button>Save Changes</Button>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={email || "john@example.com"}
+                        disabled // email usually not editable
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone || "+1 (555) 123-4567"}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        value={city || "Illinois"}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        State
+                      </label>
+                      <input
+                        type="text"
+                        value={state || "Illinois"}
+                        onChange={(e) => setState(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        ZIP Code
+                      </label>
+                      <input
+                        type="text"
+                        value={zipCode || "7865"}
+                        onChange={(e) => setZipCode(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Bio
+                      </label>
+                      <textarea
+                        value={bio || "Experienced cardiologist..."}
+                        onChange={(e) => setBio(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md h-24"
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Consultation Fee ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={consultationFee || "250.00"}
+                        onChange={(e) => setConsultationFee(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Services Offered
+                      </label>
+                      <input
+                        type="text"
+                        value={servicesOffered || "Consultation, ECG, Echo"}
+                        onChange={(e) => setServicesOffered(e.target.value)}
+                        placeholder="ECG, Echo, Consultation"
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+
+                    <Button onClick={SaveProfileSetting} disabled={loading} className="cursor-pointer">
+                      {loading ? "Saving..." : "Save Changes"}
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
