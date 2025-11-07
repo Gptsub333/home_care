@@ -248,6 +248,45 @@ export default function ProviderProfilePage() {
   const [notes, setNotes] = useState("");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
 
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleSubmitReview = async () => {
+    if (!rating || !comment.trim()) {
+      alert("Please provide both rating and comment");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSuccessMessage("");
+
+    try {
+      const res = await fetch(
+        `https://home-care-backend.onrender.com/api/providers/${id}/review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rating, comment }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to submit review");
+
+      setSuccessMessage("Thank you! Your review has been submitted.");
+      setRating(0);
+      setComment("");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while submitting your review.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     async function fetchProvider() {
       setLoading(true);
@@ -494,33 +533,33 @@ export default function ProviderProfilePage() {
                       Services Offered
                     </h3>
                     <div className="space-y-4">
-                      {provider?.servicesOffered?.split(",").map((service, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
-                        >
-                          <div>
-                            <h4 className="font-semibold mb-1">
-                              {service}
-                            </h4>
-                            {/* <p className="text-sm text-muted-foreground">
+                      {provider?.servicesOffered
+                        ?.split(",")
+                        .map((service, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
+                          >
+                            <div>
+                              <h4 className="font-semibold mb-1">{service}</h4>
+                              {/* <p className="text-sm text-muted-foreground">
                               <ClockIcon className="h-3 w-3 inline mr-1 text-teal-600" />
                               {service.duration}
                             </p> */}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
+                                ${provider.consultationFee}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
-                              ${provider.consultationFee}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              <TabsContent value="reviews" className="mt-6">
+              {/* <TabsContent value="reviews" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
@@ -574,6 +613,127 @@ export default function ProviderProfilePage() {
                           </p>
                         </div>
                       ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent> */}
+
+              <TabsContent value="reviews" className="mt-6">
+                <Card className="border-teal-100 shadow-lg">
+                  <CardContent className="p-6 space-y-8">
+                    {/* ===== Submit Review Section ===== */}
+                    <div className="border border-teal-100 rounded-lg p-6 bg-gradient-to-br from-teal-50 to-blue-50">
+                      <h3 className="text-xl font-semibold text-teal-700 mb-4">
+                        Submit Your Review
+                      </h3>
+
+                      {/* Star Rating */}
+                      <div className="flex items-center gap-2 mb-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            className="focus:outline-none cursor-pointer"
+                          >
+                            <StarIcon
+                              className={`h-6 w-6 ${
+                                star <= rating
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                              filled={star <= rating}
+                            />
+                          </button>
+                        ))}
+                        <span className="ml-2 text-sm text-muted-foreground">
+                          {rating ? `${rating} / 5` : "Select rating"}
+                        </span>
+                      </div>
+
+                      {/* Comment Box */}
+                      <Textarea
+                        placeholder="Share your experience with this provider..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        rows={4}
+                        className="mb-4"
+                      />
+
+                      {/* Submit Button */}
+                      <Button
+                        onClick={handleSubmitReview}
+                        disabled={isSubmitting}
+                        className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
+                      >
+                        {isSubmitting ? "Submitting..." : "Submit Review"}
+                      </Button>
+
+                      {successMessage && (
+                        <p className="text-green-600 mt-3 text-sm">
+                          {successMessage}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* ===== Reviews List ===== */}
+                    <div>
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-semibold text-teal-700">
+                          Patient Reviews
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <StarIcon
+                            className="h-5 w-5 text-yellow-400"
+                            filled
+                          />
+                          <span className="text-2xl font-bold">
+                            {provider.rating}
+                          </span>
+                          <span className="text-muted-foreground">
+                            ({provider.totalReviews} reviews)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {provider.reviews.map((review) => (
+                          <div
+                            key={review.id}
+                            className="border-b border-teal-100 last:border-0 pb-6 last:pb-0"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-400 flex items-center justify-center font-semibold text-white">
+                                  {review.patient.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="font-semibold">
+                                    {review.patient}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {review.createdAt}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: review.rating }).map(
+                                  (_, i) => (
+                                    <StarIcon
+                                      key={i}
+                                      className="h-4 w-4 text-yellow-400"
+                                      filled
+                                    />
+                                  )
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-muted-foreground leading-relaxed">
+                              {review.comment}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
