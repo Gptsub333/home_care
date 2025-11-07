@@ -19,42 +19,65 @@ export default function LoginPage() {
     password: '',
   });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-      credentials: 'include', // ✅ required for cookies
-    });
+    try {
+      const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include', // ✅ required for cookies
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      alert(data.message || 'Login failed');
-      return;
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || 'Login failed');
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', 'patient');
+      localStorage.setItem('user', JSON.stringify(data.user));
+      document.cookie = `token=${data.token}; path=/;`;
+      router.push('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Something went wrong');
     }
+  };
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('role', 'patient');
-    localStorage.setItem('user', JSON.stringify(data.user));
-    document.cookie = `token=${data.token}; path=/;`;
-    router.push('/');
-  } catch (error) {
-    console.error("Login error:", error);
-    alert("Something went wrong");
-  }
-};
+  // const handleLogout = async () => {
+  //   await fetch("http://localhost:5000/api/auth/logout", {
+  //     method: "POST",
+  //     credentials: "include",
+  //   });
+  //   router.push("/login");
+  // };
 
-const handleLogout = async () => {
-  await fetch("http://localhost:5000/api/auth/logout", {
-    method: "POST",
-    credentials: "include",
-  });
-  router.push("/login");
-};
+  const handleLogout = async () => {
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
 
+    const role = localStorage.getItem('role');
+
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
+
+    // Clear cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">

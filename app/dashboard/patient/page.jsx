@@ -78,17 +78,28 @@ const mockFavorites = [
 export default function PatientDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
 
-    const handleLogout = () => {
-      // Clear localStorage
-      localStorage.removeItem('user');
-      localStorage.removeItem('token'); // if you store token separately
-      localStorage.removeItem('role');
-      // Redirect to login
-      window.location.href = '/login';
-      // Clear cookie
-      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-    };
+  const handleLogout = async () => {
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
+    const role = localStorage.getItem('role');
 
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
+
+    // Clear cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
