@@ -1,33 +1,29 @@
-// middleware.js
 import { NextResponse } from "next/server";
 
 export function middleware(req) {
   const token = req.cookies.get("token");
+  const role = req.cookies.get("role");
   const url = req.nextUrl.clone();
 
-  // Define auth pages
-  const isAuthPage = 
-    url.pathname.startsWith("/login") || 
-    url.pathname.startsWith("/register") || 
-    url.pathname.startsWith("/doctor/login") || 
+  const isAuthPage =
+    url.pathname.startsWith("/login") ||
+    url.pathname.startsWith("/register") ||
+    url.pathname.startsWith("/doctor/login") ||
     url.pathname.startsWith("/doctor/register");
 
-  // Optional: Debug logging (remove in production)
-  // console.log('Middleware check:', {
-  //   path: url.pathname,
-  //   hasToken: !!token,
-  //   isAuthPage
-  // });
-
-  // If no token and trying to access protected page → redirect to login
+  // If no token → send to correct login page
   if (!token && !isAuthPage) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // If has token and trying to access auth page → redirect to home
+  // If logged in and trying to access auth pages
   if (token && isAuthPage) {
-    url.pathname = "/";
+    if (role === "provider") {
+      url.pathname = "/dashboard/doctor";
+    } else {
+      url.pathname = "/";
+    }
     return NextResponse.redirect(url);
   }
 
@@ -36,14 +32,6 @@ export function middleware(req) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
   ],
 };

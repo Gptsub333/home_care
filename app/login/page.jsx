@@ -19,41 +19,68 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      // ✅ Call YOUR OWN API route (same origin - no CORS issues!)
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        credentials: 'include', // ✅ required for cookies
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        toast.error(data.error || data.message || "Login failed");
-        setIsLoading(false);
+        alert(data.message || 'Login failed');
         return;
       }
 
-      toast.success("Login successful!");
-      
-      // Redirect and refresh to trigger middleware
-      router.push("/");
-      router.refresh();
-
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', 'patient');
+      localStorage.setItem('user', JSON.stringify(data.user));
+      document.cookie = `token=${data.token}; path=/;`;
+      router.push('/');
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Something went wrong. Please try again.");
-      setIsLoading(false);
+      console.error('Login error:', error);
+      alert('Something went wrong');
+    }
+  };
+
+  // const handleLogout = async () => {
+  //   await fetch("http://localhost:5000/api/auth/logout", {
+  //     method: "POST",
+  //     credentials: "include",
+  //   });
+  //   router.push("/login");
+  // };
+
+  const handleLogout = async () => {
+    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+    //   method: 'POST',
+    //   credentials: 'include',
+    // });
+
+    const role = localStorage.getItem('role');
+
+    // Clear localStorage
+    localStorage.removeItem('user');
+    localStorage.removeItem('token'); // if you store token separately
+    localStorage.removeItem('role');
+
+    // Clear cookie
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Redirect to login
+    if (role === 'doctor') {
+      window.location.href = '/doctor/login';
+    } else {
+      window.location.href = '/login';
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link
+        {/* <Link
           href="/"
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
         >
@@ -61,7 +88,7 @@ export default function LoginPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span>Back to home</span>
-        </Link>
+        </Link> */}
 
         <Card className="shadow-xl border-gray-200 bg-white">
           <CardHeader className="text-center pb-8">

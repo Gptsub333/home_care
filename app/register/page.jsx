@@ -20,17 +20,102 @@ export default function RegisterPage() {
     phone: '',
     password: '',
     confirmPassword: '',
+    profileImage: '',
+    profileImageKey: '',
   });
+
+  const [imageUpload, setImageUpload] = useState({
+    loading: false,
+    preview: null,
+    error: null,
+  });
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setImageUpload((prev) => ({ ...prev, error: 'Please select a valid image file' }));
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setImageUpload((prev) => ({ ...prev, error: 'Image size should be less than 5MB' }));
+      return;
+    }
+
+    // Set preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageUpload((prev) => ({ ...prev, preview: reader.result }));
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    setImageUpload((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('https://home-care-backend.onrender.com/api/upload/image', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Image upload failed');
+      }
+      console.log(data);
+      // Check if we got the required data
+      if (data.data.url && data.data.key) {
+        setFormData((prev) => ({
+          ...prev,
+          profileImage: data.data.url,
+          profileImageKey: data.data.key,
+        }));
+        setImageUpload((prev) => ({
+          ...prev,
+          loading: false,
+          error: null,
+        }));
+      } else {
+        throw new Error('Invalid response from server');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setImageUpload((prev) => ({
+        ...prev,
+        loading: false,
+        error: error.message || 'Failed to upload image',
+        preview: null,
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: '',
+        profileImageKey: '',
+      }));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.profileImage || !formData.profileImageKey) {
+      setImageUpload((prev) => ({
+        ...prev,
+        error: 'Please select and upload an image before submitting',
+      }));
+      return;
+    }
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/register`, formData);
       if (res.status === 201) {
         console.log(res);
-        toast.success('Registration successful! Redirecting to dashboard...');
-        localStorage.setItem('token', res.data.token);
-        router.push('/dashboard/patient');
+        router.push('/login');
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
@@ -81,6 +166,88 @@ export default function RegisterPage() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-gray-900 text-center">Profile Image *</Label>
+                <div className="flex flex-col items-center gap-4">
+                  {/* Image Preview or Placeholder */}
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-teal-100 bg-gray-100">
+                    {imageUpload.preview ? (
+                      <img src={imageUpload.preview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Loading Overlay */}
+                    {imageUpload.loading && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upload Button */}
+                  <div className="w-full">
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span>{imageUpload.loading ? 'Uploading...' : 'Choose Profile Image'}</span>
+                      </div>
+                    </label>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={imageUpload.loading}
+                    />
+                  </div>
+
+                  {/* Success Message */}
+                  {formData.profileImage && !imageUpload.error && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span>Image uploaded successfully</span>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {imageUpload.error && (
+                    <div className="flex items-center gap-2 text-red-600 text-sm">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span>{imageUpload.error}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-900">
