@@ -63,38 +63,6 @@ const MapPinIcon = ({ className }) => (
   </svg>
 );
 
-const ClockIcon = ({ className }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const AwardIcon = ({ className }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-    />
-  </svg>
-);
-
 const CalendarIcon = ({ className }) => (
   <svg
     className={className}
@@ -237,6 +205,10 @@ const timeSlots = [
 
 export default function ProviderProfilePage() {
   const { id } = useParams();
+  const token = localStorage.getItem("token");
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "https://home-care-backend.onrender.com/api";
 
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -252,6 +224,26 @@ export default function ProviderProfilePage() {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [reviews, setReviews] = useState([]);
+
+  const fetchReviews = async (providerId) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/providers/${providerId}/reviews`);
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+      const data = await res.json();
+      setReviews(data?.reviews || []);
+
+      // If API also returns updated average rating, update provider state
+      if (data?.averageRating) {
+        setProvider((prev) => ({
+          ...prev,
+          rating: data.averageRating,
+        }));
+      }
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    }
+  };
 
   const handleSubmitReview = async () => {
     if (!rating || !comment.trim()) {
@@ -263,20 +255,21 @@ export default function ProviderProfilePage() {
     setSuccessMessage("");
 
     try {
-      const res = await fetch(
-        `https://home-care-backend.onrender.com/api/providers/${id}/review`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ rating, comment }),
-        }
-      );
+      const res = await fetch(`${BACKEND_URL}/providers/${id}/review`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rating, comment }),
+      });
 
       if (!res.ok) throw new Error("Failed to submit review");
 
       setSuccessMessage("Thank you! Your review has been submitted.");
+
+      await fetchReviews(id);
+
       setRating(0);
       setComment("");
     } catch (err) {
@@ -316,7 +309,10 @@ export default function ProviderProfilePage() {
       }
     }
 
-    if (id) fetchProvider();
+    if (id) {
+      fetchProvider();
+      fetchReviews(id);
+    }
   }, [id]);
 
   console.log("userId---", id);
@@ -376,7 +372,7 @@ export default function ProviderProfilePage() {
               >
                 Dashboard
               </Link>
-              <Link href="/login">
+              {/* <Link href="/login">
                 <Button
                   variant="outline"
                   size="sm"
@@ -384,7 +380,7 @@ export default function ProviderProfilePage() {
                 >
                   Sign In
                 </Button>
-              </Link>
+              </Link> */}
             </nav>
           </div>
         </div>
@@ -697,7 +693,7 @@ export default function ProviderProfilePage() {
                       </div>
 
                       <div className="space-y-6">
-                        {provider.reviews.map((review) => (
+                        {reviews.map((review) => (
                           <div
                             key={review.id}
                             className="border-b border-teal-100 last:border-0 pb-6 last:pb-0"
@@ -705,14 +701,14 @@ export default function ProviderProfilePage() {
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-400 flex items-center justify-center font-semibold text-white">
-                                  {review.patient.charAt(0)}
+                                  {review?.patient?.charAt(0)}
                                 </div>
                                 <div>
                                   <p className="font-semibold">
-                                    {review.patient}
+                                    {review?.patient}
                                   </p>
                                   <p className="text-sm text-muted-foreground">
-                                    {review.createdAt}
+                                    {review?.createdAt}
                                   </p>
                                 </div>
                               </div>

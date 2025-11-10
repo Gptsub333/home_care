@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import Image from "next/image";
+import Appointments from "./appointments/page";
 
 const mockAppointments = [
   {
@@ -134,21 +135,21 @@ export default function PatientDashboard() {
     //   method: 'POST',
     //   credentials: 'include',
     // });
-    const role = localStorage.getItem('role');
+    const role = localStorage.getItem("role");
 
     // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token'); // if you store token separately
-    localStorage.removeItem('role');
+    localStorage.removeItem("user");
+    localStorage.removeItem("token"); // if you store token separately
+    localStorage.removeItem("role");
 
     // Clear cookie
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
 
     // Redirect to login
-    if (role === 'doctor') {
-      window.location.href = '/doctor/login';
+    if (role === "doctor") {
+      window.location.href = "/doctor/login";
     } else {
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   };
 
@@ -165,49 +166,49 @@ export default function PatientDashboard() {
           </Link>
           <nav className="space-y-2">
             <Button
-              variant={activeTab === 'overview' ? 'default' : 'ghost'}
+              variant={activeTab === "overview" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('overview')}
+              onClick={() => setActiveTab("overview")}
             >
               <Home className="h-4 w-4 mr-2" />
               Overview
             </Button>
             <Button
-              variant={activeTab === 'appointments' ? 'default' : 'ghost'}
+              variant={activeTab === "appointments" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('appointments')}
+              onClick={() => setActiveTab("appointments")}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Appointments
             </Button>
             <Button
-              variant={activeTab === 'favorites' ? 'default' : 'ghost'}
+              variant={activeTab === "favorites" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('favorites')}
+              onClick={() => setActiveTab("favorites")}
             >
               <Heart className="h-4 w-4 mr-2" />
               Favorites
             </Button>
             <Button
-              variant={activeTab === 'records' ? 'default' : 'ghost'}
+              variant={activeTab === "records" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('records')}
+              onClick={() => setActiveTab("records")}
             >
               <FileText className="h-4 w-4 mr-2" />
               Medical Records
             </Button>
             <Button
-              variant={activeTab === 'messages' ? 'default' : 'ghost'}
+              variant={activeTab === "messages" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('messages')}
+              onClick={() => setActiveTab("messages")}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Messages
             </Button>
             <Button
-              variant={activeTab === 'settings' ? 'default' : 'ghost'}
+              variant={activeTab === "settings" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('settings')}
+              onClick={() => setActiveTab("settings")}
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
@@ -221,9 +222,10 @@ export default function PatientDashboard() {
               </Button>
             </Link>
             <Button
-                onClick={handleLogout} variant="ghost"
-                className="w-full justify-start text-muted-foreground"
-              >
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -248,7 +250,7 @@ export default function PatientDashboard() {
             </div>
 
             {/* Overview Tab */}
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Stats */}
                 <div className="grid md:grid-cols-3 gap-6">
@@ -306,7 +308,7 @@ export default function PatientDashboard() {
                       >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={apt.image || '/placeholder.svg'}
+                            src={apt.image || "/placeholder.svg"}
                             alt={apt.provider}
                             fill
                             className="object-cover"
@@ -344,104 +346,105 @@ export default function PatientDashboard() {
             )}
 
             {/* Appointments Tab */}
-            {activeTab === 'appointments' && (
-              <div className="space-y-6">
-                <Tabs defaultValue="upcoming">
-                  <TabsList>
-                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                    <TabsTrigger value="past">Past</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="upcoming" className="mt-6 space-y-4">
-                    {mockAppointments.map((apt) => (
-                      <Card key={apt.id}>
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-4">
-                            <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
-                              <Image
-                                src={apt.image || '/placeholder.svg'}
-                                alt={apt.provider}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-xl font-semibold mb-1">
-                                {apt.provider}
-                              </h3>
-                              <p className="text-muted-foreground mb-3">
-                                {apt.specialty}
-                              </p>
-                              <div className="flex flex-wrap gap-4 text-sm">
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Calendar className="h-4 w-4" />
-                                  {apt.date}
-                                </span>
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Clock className="h-4 w-4" />
-                                  {apt.time}
-                                </span>
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <MapPin className="h-4 w-4" />
-                                  {apt.location}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button>View Details</Button>
-                              <Button variant="outline">Message</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </TabsContent>
-                  <TabsContent value="past" className="mt-6 space-y-4">
-                    {mockPastAppointments.map((apt) => (
-                      <Card key={apt.id}>
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-4">
-                            <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
-                              <Image
-                                src={apt.image || '/placeholder.svg'}
-                                alt={apt.provider}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-xl font-semibold mb-1">
-                                {apt.provider}
-                              </h3>
-                              <p className="text-muted-foreground mb-3">
-                                {apt.specialty}
-                              </p>
-                              <div className="flex flex-wrap gap-4 text-sm">
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Calendar className="h-4 w-4" />
-                                  {apt.date}
-                                </span>
-                                <span className="flex items-center gap-1 text-muted-foreground">
-                                  <Clock className="h-4 w-4" />
-                                  {apt.time}
-                                </span>
-                                <Badge variant="secondary">Completed</Badge>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button>Leave Review</Button>
-                              <Button variant="outline">Book Again</Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </TabsContent>
-                </Tabs>
-              </div>
+            {activeTab === "appointments" && (
+              // <div className="space-y-6">
+              //   <Tabs defaultValue="upcoming">
+              //     <TabsList>
+              //       <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              //       <TabsTrigger value="past">Past</TabsTrigger>
+              //     </TabsList>
+              //     <TabsContent value="upcoming" className="mt-6 space-y-4">
+              //       {mockAppointments.map((apt) => (
+              //         <Card key={apt.id}>
+              //           <CardContent className="p-6">
+              //             <div className="flex items-center gap-4">
+              //               <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
+              //                 <Image
+              //                   src={apt.image || '/placeholder.svg'}
+              //                   alt={apt.provider}
+              //                   fill
+              //                   className="object-cover"
+              //                 />
+              //               </div>
+              //               <div className="flex-1">
+              //                 <h3 className="text-xl font-semibold mb-1">
+              //                   {apt.provider}
+              //                 </h3>
+              //                 <p className="text-muted-foreground mb-3">
+              //                   {apt.specialty}
+              //                 </p>
+              //                 <div className="flex flex-wrap gap-4 text-sm">
+              //                   <span className="flex items-center gap-1 text-muted-foreground">
+              //                     <Calendar className="h-4 w-4" />
+              //                     {apt.date}
+              //                   </span>
+              //                   <span className="flex items-center gap-1 text-muted-foreground">
+              //                     <Clock className="h-4 w-4" />
+              //                     {apt.time}
+              //                   </span>
+              //                   <span className="flex items-center gap-1 text-muted-foreground">
+              //                     <MapPin className="h-4 w-4" />
+              //                     {apt.location}
+              //                   </span>
+              //                 </div>
+              //               </div>
+              //               <div className="flex flex-col gap-2">
+              //                 <Button>View Details</Button>
+              //                 <Button variant="outline">Message</Button>
+              //               </div>
+              //             </div>
+              //           </CardContent>
+              //         </Card>
+              //       ))}
+              //     </TabsContent>
+              //     <TabsContent value="past" className="mt-6 space-y-4">
+              //       {mockPastAppointments.map((apt) => (
+              //         <Card key={apt.id}>
+              //           <CardContent className="p-6">
+              //             <div className="flex items-center gap-4">
+              //               <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0">
+              //                 <Image
+              //                   src={apt.image || '/placeholder.svg'}
+              //                   alt={apt.provider}
+              //                   fill
+              //                   className="object-cover"
+              //                 />
+              //               </div>
+              //               <div className="flex-1">
+              //                 <h3 className="text-xl font-semibold mb-1">
+              //                   {apt.provider}
+              //                 </h3>
+              //                 <p className="text-muted-foreground mb-3">
+              //                   {apt.specialty}
+              //                 </p>
+              //                 <div className="flex flex-wrap gap-4 text-sm">
+              //                   <span className="flex items-center gap-1 text-muted-foreground">
+              //                     <Calendar className="h-4 w-4" />
+              //                     {apt.date}
+              //                   </span>
+              //                   <span className="flex items-center gap-1 text-muted-foreground">
+              //                     <Clock className="h-4 w-4" />
+              //                     {apt.time}
+              //                   </span>
+              //                   <Badge variant="secondary">Completed</Badge>
+              //                 </div>
+              //               </div>
+              //               <div className="flex flex-col gap-2">
+              //                 <Button>Leave Review</Button>
+              //                 <Button variant="outline">Book Again</Button>
+              //               </div>
+              //             </div>
+              //           </CardContent>
+              //         </Card>
+              //       ))}
+              //     </TabsContent>
+              //   </Tabs>
+              // </div>
+              <Appointments role="provider" />
             )}
 
             {/* Favorites Tab */}
-            {activeTab === 'favorites' && (
+            {activeTab === "favorites" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -455,7 +458,7 @@ export default function PatientDashboard() {
                       >
                         <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={fav.image || '/placeholder.svg'}
+                            src={fav.image || "/placeholder.svg"}
                             alt={fav.name}
                             fill
                             className="object-cover"
@@ -482,7 +485,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Medical Records Tab */}
-            {activeTab === 'records' && (
+            {activeTab === "records" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -498,7 +501,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Messages Tab */}
-            {activeTab === 'messages' && (
+            {activeTab === "messages" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -514,7 +517,7 @@ export default function PatientDashboard() {
             )}
 
             {/* Settings Tab */}
-            {activeTab === 'settings' && (
+            {activeTab === "settings" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -630,7 +633,11 @@ export default function PatientDashboard() {
                       />
                     </div>
 
-                    <Button onClick={SaveProfileSetting} disabled={loading} className="cursor-pointer">
+                    <Button
+                      onClick={SaveProfileSetting}
+                      disabled={loading}
+                      className="cursor-pointer"
+                    >
                       {loading ? "Saving..." : "Save Changes"}
                     </Button>
                   </CardContent>
