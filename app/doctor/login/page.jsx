@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label"
 
 export default function ProviderLoginPage() {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,6 +20,7 @@ export default function ProviderLoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
         method: 'POST',
@@ -40,6 +43,8 @@ export default function ProviderLoginPage() {
     } catch (error) {
       console.error('Login error:', error);
       alert('Something went wrong');
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -146,12 +151,17 @@ export default function ProviderLoginPage() {
                 </Link>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600"
-              >
-                Sign In to Provider Portal
-              </Button>
+              <Button           
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600 flex items-center justify-center gap-2"
+          >
+            {isLoading && (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            )}
+            {isLoading ? "Signing In..." : "Sign In to Provider Portal"}
+          </Button>
+
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">

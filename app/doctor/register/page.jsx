@@ -14,6 +14,8 @@ import axios from 'axios';
 export default function DoctorRegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     // Personal Info
     name: '',
@@ -117,6 +119,7 @@ export default function DoctorRegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (step < 3) {
       if (step === 1 && !formData.profileImage) {
         setImageUpload((prev) => ({
@@ -141,6 +144,8 @@ export default function DoctorRegisterPage() {
         }
       } catch (error) {
         toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+      }finally {  
+        setIsLoading(false);
       }
     }
   };
