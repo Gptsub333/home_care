@@ -100,6 +100,7 @@ const timeSlots = [
   "3:00 PM",
   "4:00 PM",
 ];
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api';
 
 export default function ProviderProfilePage() {
   const { id } = useParams();
@@ -145,8 +146,9 @@ export default function ProviderProfilePage() {
       if (!res.ok) {
         throw new Error("Failed to fetch provider");
       }
-
+    
       const data = await res.json();
+       console.log(data);
       setProvider(data);
     } catch (err) {
       setError("Failed to load provider details");
@@ -278,6 +280,51 @@ export default function ProviderProfilePage() {
   if (error)
     return <div className="p-10 text-center text-red-600">{error}</div>;
   if (!provider) return <div>No provider found</div>;
+
+// Add this function to your existing ProviderProfilePage component
+// Place it before the return statement
+
+const handleSendMessage = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('Please login to send messages')
+      window.location.href = '/login'
+      return
+    }
+
+    // Create or get chat room
+    const response = await fetch(`${BACKEND_URL}/messages/room`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        providerId: provider.providerId  // This is the provider ID from your API
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to create chat room')
+    }
+
+    const data = await response.json()
+    
+    // Redirect to chat page with room ID
+    window.location.href = `/messages/${data.room.id}`
+  } catch (error) {
+    console.error('Error creating chat:', error)
+    alert('Failed to start chat. Please try again.')
+  }
+}
+
+// Update the "Send Message" button in your return JSX:
+// Replace this line:
+// <Link href={`/messages/${mockProvider.id}`} className="block">
+
+// With this:
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-cyan-50">
@@ -630,15 +677,15 @@ export default function ProviderProfilePage() {
                   {/* ... rest of dialog content ... */}
                 </Dialog>
 
-                <Link href={`/messages/${mockProvider.id}`} className="block">
-                  <Button
-                    variant="outline"
-                    className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
-                  >
-                    <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
-                    Send Message
-                  </Button>
-                </Link>
+              <div className="block" onClick={handleSendMessage}>
+                <Button
+                  variant="outline"
+                  className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
+                >
+                  <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
+                  Send Message
+                </Button>
+              </div>
 
                 <div className="mt-6 pt-6 border-t border-teal-100 space-y-3">
                   <div className="flex items-center gap-2 text-sm">

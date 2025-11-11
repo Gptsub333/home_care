@@ -513,47 +513,48 @@ export default function CompleteSettingsPage() {
 
             {/* Appointments Tab */}
             {activeTab === 'appointments' && (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upcoming Appointments</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {mockUpcomingAppointments.map((apt) => (
-                      <div key={apt.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
-                            {apt.patient
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold mb-1">{apt.patient}</h4>
-                            <p className="text-sm text-muted-foreground">{apt.service}</p>
-                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {apt.date}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {apt.time}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm">Accept</Button>
-                          <Button size="sm" variant="outline">
-                            Decline
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
+              // <div className="space-y-6">
+              //   <Card>
+              //     <CardHeader>
+              //       <CardTitle>Upcoming Appointments</CardTitle>
+              //     </CardHeader>
+              //     <CardContent className="space-y-4">
+              //       {mockUpcomingAppointments.map((apt) => (
+              //         <div key={apt.id} className="flex items-center justify-between p-4 border rounded-lg">
+              //           <div className="flex items-center gap-4">
+              //             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
+              //               {apt.patient
+              //                 .split(' ')
+              //                 .map((n) => n[0])
+              //                 .join('')}
+              //             </div>
+              //             <div>
+              //               <h4 className="font-semibold mb-1">{apt.patient}</h4>
+              //               <p className="text-sm text-muted-foreground">{apt.service}</p>
+              //               <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              //                 <span className="flex items-center gap-1">
+              //                   <Calendar className="h-3 w-3" />
+              //                   {apt.date}
+              //                 </span>
+              //                 <span className="flex items-center gap-1">
+              //                   <Clock className="h-3 w-3" />
+              //                   {apt.time}
+              //                 </span>
+              //               </div>
+              //             </div>
+              //           </div>
+              //           <div className="flex gap-2">
+              //             <Button size="sm">Accept</Button>
+              //             <Button size="sm" variant="outline">
+              //               Decline
+              //             </Button>
+              //           </div>
+              //         </div>
+              //       ))}
+              //     </CardContent>
+              //   </Card>
+              // </div>
+              <Appointments role="doctor" />
             )}
 
             {/* Earnings Tab */}
