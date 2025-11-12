@@ -24,11 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { format, addMinutes } from "date-fns";
+import { format, addMinutes } from "date-fns"; // required for formatting date
 
-// -------------------------------------------------------------------
-// Icons
-// -------------------------------------------------------------------
+// ... (keep all your icon components - StarIcon, MapPinIcon, etc.)
 
 const StarIcon = ({ className, filled }) => (
   <svg
@@ -68,6 +66,38 @@ const MapPinIcon = ({ className }) => (
   </svg>
 );
 
+const CalendarIcon = ({ className }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+    />
+  </svg>
+);
+
+const MessageCircleIcon = ({ className }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+    />
+  </svg>
+);
+
 const HeartIcon = ({ className }) => (
   <svg
     className={className}
@@ -101,50 +131,71 @@ const Share2Icon = ({ className }) => (
 );
 
 const ChevronLeftIcon = ({ className }) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 19l-7-7 7-7"
-    />
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
   </svg>
 );
 
-// -------------------------------------------------------------------
-// Main Component
-// -------------------------------------------------------------------
+
+const mockProvider = {
+  id: 1,
+  name: "Dr. Sarah Johnson",
+  price: 150,
+  services: [
+    { name: "General Consultation", price: 150, duration: "30 min" },
+    { name: "Comprehensive Physical", price: 250, duration: "60 min" },
+    { name: "Follow-up Visit", price: 100, duration: "20 min" },
+    { name: "Urgent Care", price: 200, duration: "45 min" },
+  ],
+};
+
+const timeSlots = [
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+];
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api';
+
+const services = [
+  { name: "General Consultation", price: 150, duration: "30 min" },
+  { name: "Comprehensive Physical", price: 250, duration: "60 min" },
+  { name: "Follow-up Visit", price: 100, duration: "20 min" },
+  { name: "Urgent Care", price: 200, duration: "45 min" },
+];
 
 export default function ProviderProfilePage() {
   const { id } = useParams();
+  // const token = localStorage.getItem("token");
   const BACKEND_URL =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     "https://home-care-backend.onrender.com/api";
 
   const [token, setToken] = useState(null);
+
+  // Provider details state
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Booking state
   const [date, setDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedService, setSelectedService] = useState("");
   const [notes, setNotes] = useState("");
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [timeSlots, setTimeSlots] = useState([]);
   const [endTime, setEndTime] = useState("");
+
+  // Review submission state
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [reviews, setReviews] = useState([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
 
+  // ================== LOCALSTORAGE FIX ==================
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedToken = localStorage.getItem("token");
@@ -152,51 +203,106 @@ export default function ProviderProfilePage() {
     }
   }, []);
 
+  // Reviews list state
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsPagination, setReviewsPagination] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Fetch provider details
   const fetchProvider = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/providers/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch provider");
+      const res = await fetch(
+        `https://home-care-backend.onrender.com/api/providers/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch provider");
+      }
+    
       const data = await res.json();
+       console.log(data);
       setProvider(data);
     } catch (err) {
       setError("Failed to load provider details");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch reviews
   const fetchReviews = async () => {
+    if (!id) return;
+
     setReviewsLoading(true);
     try {
       const res = await fetch(
-        `${BACKEND_URL}/providers/${id}/reviews?page=${currentPage}&limit=5`
+        `https://home-care-backend.onrender.com/api/providers/${id}/reviews?page=${currentPage}&limit=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch reviews");
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error("Failed to fetch reviews");
-      setReviews(data.reviews || []);
+      setReviews(data.reviews);
+      setReviewsPagination(data.pagination);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load reviews:", err);
     } finally {
       setReviewsLoading(false);
     }
   };
 
+  // Fetch provider on mount
   useEffect(() => {
-    if (id) {
-      fetchProvider();
-      fetchReviews();
-    }
+    if (id) fetchProvider();
   }, [id]);
 
-  // Review submission
+  // Fetch reviews when page changes
+  useEffect(() => {
+    fetchReviews();
+  }, [id, currentPage]);
+
+  // Submit review
   const handleSubmitReview = async () => {
     if (!rating || !comment.trim()) {
       alert("Please provide both rating and comment");
       return;
     }
+
     setIsSubmitting(true);
+    setSuccessMessage("");
+
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return null;
+    };
+
+    const token = getCookie("token");
+
+    if (!token) {
+      alert("You must be logged in to submit a review. Please login first.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${BACKEND_URL}/providers/${id}/review`, {
         method: "POST",
@@ -206,39 +312,186 @@ export default function ProviderProfilePage() {
         },
         body: JSON.stringify({ rating, comment }),
       });
-      if (!res.ok) throw new Error("Failed to submit review");
-      setSuccessMessage("Review submitted successfully!");
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to submit review");
+      }
+
+      const result = await res.json();
+      setSuccessMessage("Thank you! Your review has been submitted.");
+
+      await fetchReviews(id);
+
       setRating(0);
       setComment("");
+
+      // Refresh both provider data and reviews
+      fetchProvider();
+      setCurrentPage(1); // Reset to first page
       fetchReviews();
     } catch (err) {
-      alert(err.message);
+      console.error(err);
+      alert(err.message || "Something went wrong while submitting your review.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSendMessage = async () => {
-    try {
-      if (!token) {
-        alert("Please login first");
-        window.location.href = "/login";
-        return;
+  useEffect(() => {
+    async function fetchProvider() {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `https://home-care-backend.onrender.com/api/providers/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch provider");
+        }
+
+        setLoading(false);
+        const data = await res.json();
+        setProvider(data);
+      } catch (err) {
+        setError("Failed to load provider details");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      const res = await fetch(`${BACKEND_URL}/messages/room`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ providerId: provider.providerId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error("Failed to create chat room");
-      window.location.href = `/messages/${data.room.id}`;
-    } catch (err) {
-      alert("Failed to start chat");
     }
+
+    if (id) {
+      fetchProvider();
+      fetchReviews(id);
+    }
+  }, [id]);
+
+  console.log("userId---", id);
+
+  // const handleBooking = () => {
+  //   console.log("[v0] Booking:", {
+  //     date,
+  //     selectedTime,
+  //     selectedService,
+  //     notes,
+  //   });
+  //   setIsBookingOpen(false);
+  //   // Reset form
+  //   setSelectedTime("");
+  //   setSelectedService("");
+  //   setNotes("");
+  // };
+
+  const selectedServiceDetails = services.find(
+    (s) => s.name === selectedService
+  );
+
+  // =================== FETCH AVAILABLE SLOTS ===================
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!date || !provider?.providerId) return;
+      try {
+        const res = await fetch(
+          `${BACKEND_URL}/appointments/availability/${
+            provider?.providerId
+          }/slots?date=${format(date, "yyyy-MM-dd")}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "Failed to fetch available slots");
+        setTimeSlots(data.slots || []);
+      } catch (err) {
+        console.error(err);
+        setTimeSlots([]);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [date, provider?.providerId]);
+
+  useEffect(() => {
+    if (!selectedTime) return;
+
+    // Convert selectedTime (e.g., "10:00 AM") to 24hr Date object
+    const start24 = convertTo24Hour(selectedTime);
+    const startDateTime = new Date(`1970-01-01T${start24}`);
+    const end = addMinutes(startDateTime, 30);
+    const formattedEnd = format(end, "hh:mm a");
+    setEndTime(formattedEnd);
+  }, [selectedTime]);
+
+  const handleBooking = async () => {
+  if (!selectedService || !date || !selectedTime) {
+    alert("Please select service, date, and time before booking.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await fetch(`${BACKEND_URL}/appointments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        providerId: provider?.providerId,
+        serviceType: selectedService,
+        appointmentDate: format(date, "yyyy-MM-dd"),
+        startTime: selectedTime,
+        endTime: endTime,
+        duration: 30,
+        price: provider?.consultationFee || 0,
+        patientNotes: notes || "",
+      }),
+    });
+
+    const data = await res.json();
+
+    // ✅ Handle error response
+    if (!res.ok || data.error) {
+      throw new Error(data.error || "Failed to book appointment");
+    }
+
+    // ✅ On success
+    setSuccessMessage(data.message || "Appointment booked successfully!");
+    alert(data.message || "Appointment booked successfully!");
+
+    // reset form
+    setSelectedService("");
+    setSelectedTime("");
+    setDate(null);
+    setNotes("");
+    setIsBookingOpen(false);
+
+  } catch (error) {
+    console.error(error);
+    // show API error message
+    alert(error.message || "Booking failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // Helper: convert "10:00 AM" → "10:00"
+  const convertTo24Hour = (time12h) => {
+    const [time, modifier] = time12h.split(" ");
+    let [hours, minutes] = time.split(":");
+    hours = parseInt(hours);
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+    return `${hours.toString().padStart(2, "0")}:${minutes}`;
   };
 
   if (loading)
@@ -247,46 +500,89 @@ export default function ProviderProfilePage() {
     return <div className="p-10 text-center text-red-600">{error}</div>;
   if (!provider) return <div>No provider found</div>;
 
-  // -------------------------------------------------------------------
-  // UI
-  // -------------------------------------------------------------------
+// Add this function to your existing ProviderProfilePage component
+// Place it before the return statement
+
+const handleSendMessage = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      alert('Please login to send messages')
+      window.location.href = '/login'
+      return
+    }
+
+    // Create or get chat room
+    const response = await fetch(`${BACKEND_URL}/messages/room`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        providerId: provider.providerId  // This is the provider ID from your API
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to create chat room')
+    }
+
+    const data = await response.json()
+    
+    // Redirect to chat page with room ID
+    window.location.href = `/messages/${data.room.id}`
+  } catch (error) {
+    console.error('Error creating chat:', error)
+    alert('Failed to start chat. Please try again.')
+  }
+}
+
+// Update the "Send Message" button in your return JSX:
+// Replace this line:
+// <Link href={`/messages/${mockProvider.id}`} className="block">
+
+// With this:
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-cyan-50">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-2xl font-serif font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
-          >
-            MediLux
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="text-sm hover:text-teal-600 transition-colors"
+              className="text-2xl font-serif font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
             >
-              Home
+              MediLux
             </Link>
-            <Link
-              href="/search"
-              className="text-sm hover:text-teal-600 transition-colors"
-            >
-              Find Care
-            </Link>
-            <Link
-              href="/dashboard/patient"
-              className="text-sm hover:text-teal-600 transition-colors"
-            >
-              Dashboard
-            </Link>
-          </nav>
+            <nav className="hidden md:flex items-center gap-6">
+              <Link href="/" className="text-sm hover:text-teal-600 transition-colors">
+                Home
+              </Link>
+              <Link href="/search" className="text-sm hover:text-teal-600 transition-colors">
+                Find Care
+              </Link>
+              <Link href="/dashboard/patient" className="text-sm hover:text-teal-600 transition-colors">
+                Dashboard
+              </Link>
+              {/* <Link href="/login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
+                >
+                  Sign In
+                </Button>
+              </Link> */}
+            </nav>
+          </div>
         </div>
       </header>
 
-      {/* Main Section */}
       <div className="container mx-auto px-4 py-8">
+        {/* Back Button */}
         <Link
           href="/search"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-teal-600 mb-6 transition-colors"
@@ -296,64 +592,54 @@ export default function ProviderProfilePage() {
         </Link>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left: Main Info */}
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Provider Header Card - Keep your existing code */}
             <Card className="border-teal-100 shadow-lg">
-              <CardContent className="p-6 flex flex-col md:flex-row gap-6">
-                <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0 mx-auto md:mx-0 ring-4 ring-teal-100">
-                  <Image
-                    src={provider.image || "/placeholder.svg"}
-                    alt={provider.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-                    <div>
-                      <h1 className="text-3xl font-serif font-bold mb-2 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-                        {provider.name}
-                      </h1>
-                      <p className="text-lg text-muted-foreground mb-3">
-                        {provider.specialty}
-                      </p>
-                      <div className="flex items-center justify-center md:justify-start gap-4 flex-wrap">
-                        <div className="flex items-center gap-1">
-                          <StarIcon
-                            className="h-5 w-5 text-yellow-400"
-                            filled
-                          />
-                          <span className="font-semibold">
-                            {provider.rating}
-                          </span>
-                          <span className="text-muted-foreground">
-                            ({provider.totalReviews} reviews)
-                          </span>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden flex-shrink-0 mx-auto md:mx-0 ring-4 ring-teal-100">
+                    <Image
+                      src={provider.image || "/placeholder.svg"}
+                      alt={provider.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                      <div>
+                        <h1 className="text-3xl font-serif font-bold mb-2 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+                          {provider.name}
+                        </h1>
+                        <p className="text-lg text-muted-foreground mb-3">
+                          {provider?.specialty}
+                        </p>
+                        <div className="flex items-center justify-center md:justify-start gap-4 flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <StarIcon className="h-5 w-5 text-yellow-400" filled />
+                            <span className="font-semibold">{provider.rating}</span>
+                            <span className="text-muted-foreground">
+                              ({provider.totalReviews} reviews)
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <div className="flex gap-2 justify-center md:justify-start">
+                        <Button variant="outline" size="icon" className="border-teal-200 hover:bg-teal-50 bg-transparent">
+                          <HeartIcon className="h-4 w-4 text-teal-600" />
+                        </Button>
+                        <Button variant="outline" size="icon" className="border-teal-200 hover:bg-teal-50 bg-transparent">
+                          <Share2Icon className="h-4 w-4 text-teal-600" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex gap-2 justify-center md:justify-start">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="border-teal-200 hover:bg-teal-50"
-                      >
-                        <HeartIcon className="h-4 w-4 text-teal-600" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="border-teal-200 hover:bg-teal-50"
-                      >
-                        <Share2Icon className="h-4 w-4 text-teal-600" />
-                      </Button>
+                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                      <MapPinIcon className="h-4 w-4 text-teal-600" />
+                      <span>
+                        {provider.city}, {provider.state}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-                    <MapPinIcon className="h-4 w-4 text-teal-600" />
-                    <span>
-                      {provider.city}, {provider.state}
-                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -362,67 +648,81 @@ export default function ProviderProfilePage() {
             {/* Tabs */}
             <Tabs defaultValue="about" className="w-full">
               <TabsList className="w-full justify-start bg-white border border-teal-100">
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="services">Services</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger
+                  value="about"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+                >
+                  About
+                </TabsTrigger>
+                <TabsTrigger
+                  value="services"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+                >
+                  Services
+                </TabsTrigger>
+                <TabsTrigger
+                  value="reviews"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-blue-500 data-[state=active]:text-white"
+                >
+                  Reviews
+                </TabsTrigger>
               </TabsList>
 
-              {/* About */}
+              {/* About Tab - Keep your existing code */}
               <TabsContent value="about" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6 space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-3 text-teal-700">
-                        About
-                      </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {provider.bio}
-                      </p>
+                      <h3 className="text-xl font-semibold mb-3 text-teal-700">About</h3>
+                      <p className="text-muted-foreground leading-relaxed">{provider.bio}</p>
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-3 text-teal-700">
                         Education & Credentials
                       </h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {provider.qualifications}
-                      </p>
+                      <p className="text-muted-foreground leading-relaxed">{provider.qualifications}</p>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Services */}
+              {/* Services Tab - Keep your existing code */}
               <TabsContent value="services" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
-                  <CardContent className="p-6 space-y-4">
-                    <h3 className="text-xl font-semibold mb-4 text-teal-700">
-                      Services Offered
-                    </h3>
-                    {provider?.servicesOffered
-                      ?.split(",")
-                      .map((service, idx) => (
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-semibold mb-4 text-teal-700">Services Offered</h3>
+                    <div className="space-y-4">
+                      {provider?.servicesOffered?.split(",").map((service, idx) => (
                         <div
                           key={idx}
                           className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
                         >
-                          <h4 className="font-semibold mb-1">{service}</h4>
-                          <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
-                            ${provider.consultationFee}
-                          </p>
+                          <div>
+                            <h4 className="font-semibold mb-1">{service}</h4>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
+                              ${provider.consultationFee}
+                            </p>
+                          </div>
                         </div>
                       ))}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Reviews */}
+              {/* Reviews Tab - UPDATED */}
               <TabsContent value="reviews" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6 space-y-8">
+                    {/* Submit Review Section */}
                     <div className="border border-teal-100 rounded-lg p-6 bg-gradient-to-br from-teal-50 to-blue-50">
                       <h3 className="text-xl font-semibold text-teal-700 mb-4">
                         Submit Your Review
                       </h3>
+
+                      {/* Star Rating */}
                       <div className="flex items-center gap-2 mb-4">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
@@ -433,9 +733,7 @@ export default function ProviderProfilePage() {
                           >
                             <StarIcon
                               className={`h-6 w-6 ${
-                                star <= rating
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
+                                star <= rating ? "text-yellow-400" : "text-gray-300"
                               }`}
                               filled={star <= rating}
                             />
@@ -445,13 +743,17 @@ export default function ProviderProfilePage() {
                           {rating ? `${rating} / 5` : "Select rating"}
                         </span>
                       </div>
+
+                      {/* Comment Box */}
                       <Textarea
-                        placeholder="Share your experience..."
+                        placeholder="Share your experience with this provider..."
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         rows={4}
                         className="mb-4"
                       />
+
+                      {/* Submit Button */}
                       <Button
                         onClick={handleSubmitReview}
                         disabled={isSubmitting}
@@ -459,53 +761,85 @@ export default function ProviderProfilePage() {
                       >
                         {isSubmitting ? "Submitting..." : "Submit Review"}
                       </Button>
+
                       {successMessage && (
-                        <p className="text-green-600 mt-3 text-sm">
-                          {successMessage}
-                        </p>
+                        <p className="text-green-600 mt-3 text-sm">{successMessage}</p>
                       )}
                     </div>
 
+                    {/* Reviews List */}
                     <div>
-                      <h3 className="text-xl font-semibold text-teal-700 mb-4">
-                        Recent Reviews
-                      </h3>
-                      {reviewsLoading ? (
-                        <p>Loading reviews...</p>
-                      ) : reviews.length > 0 ? (
-                        <div className="space-y-4">
-                          {reviews.map((review, index) => (
-                            <div
-                              key={index}
-                              className="border border-teal-100 rounded-lg p-4 bg-white shadow-sm"
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <StarIcon
-                                      key={i}
-                                      className={`h-4 w-4 ${
-                                        i < review.rating
-                                          ? "text-yellow-400"
-                                          : "text-gray-300"
-                                      }`}
-                                      filled={i < review.rating}
-                                    />
-                                  ))}
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-semibold text-teal-700">Patient Reviews</h3>
+                        <div className="flex items-center gap-2">
+                          <StarIcon className="h-5 w-5 text-yellow-400" filled />
+                          <span className="text-2xl font-bold">{provider.rating}</span>
+                          <span className="text-muted-foreground">
+                            ({provider.totalReviews} reviews)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        {reviews.map((review) => (
+                          <div
+                            key={review.id}
+                            className="border-b border-teal-100 last:border-0 pb-6 last:pb-0"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-400 flex items-center justify-center font-semibold text-white">
+                                  {review?.patient?.charAt(0)}
                                 </div>
-                                <span className="text-sm text-muted-foreground">
-                                  {format(new Date(review.createdAt), "PPP")}
-                                </span>
+                                <div>
+                                  <p className="font-semibold">
+                                    {review?.patient}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {review?.createdAt}
+                                  </p>
+                                </div>
+                                <p className="text-muted-foreground leading-relaxed">
+                                  {review.comment}
+                                </p>
                               </div>
-                              <p className="text-muted-foreground">
-                                {review.comment}
-                              </p>
+                              </div>
                             </div>
                           ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground">No reviews yet.</p>
-                      )}
+                          {/* Pagination */}
+                          {reviewsPagination && reviewsPagination.totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-2 mt-6">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="cursor-pointer"
+                              >
+                                Previous
+                              </Button>
+                              <span className="text-sm text-muted-foreground">
+                                Page {currentPage} of {reviewsPagination.totalPages}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  setCurrentPage((prev) =>
+                                    Math.min(reviewsPagination.totalPages, prev + 1)
+                                  )
+                                }
+                                disabled={currentPage === reviewsPagination.totalPages}
+                                className="cursor-pointer"
+                              >
+                                Next
+                              </Button>
+                            </div>
+                        
+                              )}
+                    
+                      
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -513,145 +847,202 @@ export default function ProviderProfilePage() {
             </Tabs>
           </div>
 
-          {/* Right: Booking / Contact */}
+          {/* Sidebar - Keep your existing booking card */}
           <div className="space-y-6">
-            <Card className="border-teal-100 shadow-lg sticky top-20">
-              <CardContent className="p-6 space-y-6">
-                <div className="text-center">
-                  <h3>Book Appointment</h3>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Consultation Fee
-                  </p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+            <Card className="sticky top-24 border-teal-100 shadow-lg">
+              <CardContent className="p-6">
+                <div className="text-center mb-6">
+                  <h2>Book Appointment</h2>
+                  <p className="text-sm text-muted-foreground mb-2">Starting from</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent mb-1">
                     ${provider.consultationFee}
                   </p>
+                  <p className="text-sm text-muted-foreground">per visit</p>
                 </div>
 
-                <Dialog>
+                {/* ... rest of your booking dialog and sidebar content ... */}
+                <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
                   <DialogTrigger asChild>
-                    <Button className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer">
+                    <Button
+                      className="w-full mb-3 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
+                      size="lg"
+                    >
+                      <CalendarIcon className="h-5 w-5 mr-2" />
                       Book Appointment
                     </Button>
                   </DialogTrigger>
-
-                  <DialogContent className="max-w-lg rounded-2xl p-0 overflow-hidden">
-                    <div className="bg-gradient-to-r from-teal-500 to-blue-500 px-6 py-4 text-white">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold">
-                          Book an Appointment
-                        </DialogTitle>
-                        <DialogDescription className="text-white/80">
-                          Choose a convenient date, time, and service to meet
-                          with {provider?.name}.
-                        </DialogDescription>
-                      </DialogHeader>
-                    </div>
-
-                    <div className="p-6 space-y-6">
-                      {/* Date */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          📅 Date
-                        </label>
-                        <div className="rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                          <CalendarComponent
-                            mode="single"
-                            selected={date}
-                            onSelect={setDate}
-                            className="rounded-md"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Time */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          ⏰ Time
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl">
+                        Book Appointment
+                      </DialogTitle>
+                      <DialogDescription>
+                        Schedule your visit with {provider.name}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      {/* Service Selection */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Select Service
                         </label>
                         <Select
-                          value={selectedTime}
-                          onValueChange={setSelectedTime}
+                          value={selectedService}
+                          onValueChange={setSelectedService}
                         >
-                          <SelectTrigger className="rounded-lg border-gray-300 focus:ring-teal-500">
-                            <SelectValue placeholder="Select time slot" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a service" />
                           </SelectTrigger>
                           <SelectContent>
-                            {[
-                              "09:00 AM",
-                              "10:00 AM",
-                              "11:00 AM",
-                              "12:00 PM",
-                              "03:00 PM",
-                              "05:00 PM",
-                            ].map((time) => (
-                              <SelectItem key={time} value={time}>
-                                {time}
+                            {services.map((service) => (
+                              <SelectItem
+                                key={service.name}
+                                value={service.name}
+                              >
+                                {service.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
 
-                      {/* Service */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          💼 Service
+                      {/* Date Selection */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Select Date
                         </label>
-                        <Select
-                          value={selectedService}
-                          onValueChange={setSelectedService}
-                        >
-                          <SelectTrigger className="rounded-lg border-gray-300 focus:ring-teal-500">
-                            <SelectValue placeholder="Select service" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {provider?.servicesOffered
-                              ?.split(",")
-                              .map((service, idx) => (
-                                <SelectItem key={idx} value={service.trim()}>
-                                  {service}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Notes */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          📝 Notes
-                        </label>
-                        <Textarea
-                          placeholder="Add any notes (optional)"
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          rows={3}
-                          className="rounded-lg border-gray-300 focus:ring-teal-500"
+                        <CalendarComponent
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          className="rounded-md border"
+                          disabled={(date) => date < new Date()}
                         />
                       </div>
 
-                      {/* Confirm Button */}
-                      <div className="pt-4">
-                        <Button
-                          className="w-full py-3 rounded-lg bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold hover:from-teal-600 hover:to-blue-600 transition-all cursor-pointer"
-                          onClick={() =>
-                            alert("Appointment booked successfully!")
-                          }
-                        >
-                          Confirm Booking
-                        </Button>
+                      {/* Time Selection */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Select Time
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {timeSlots.map((time) => (
+                            <Button
+                              key={time}
+                              variant={
+                                selectedTime === time ? "default" : "outline"
+                              }
+                              onClick={() => setSelectedTime(time)}
+                              className={
+                                selectedTime === time
+                                  ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer"
+                                  : "cursor-pointer"
+                              }
+                            >
+                              {time}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
+
+                      {/* Notes */}
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Additional Notes (Optional)
+                        </label>
+                        <Textarea
+                          placeholder="Any specific concerns or requirements..."
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+
+                      {/* Summary */}
+                      {selectedService && selectedTime && (
+                        <div className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg space-y-2 border border-teal-100">
+                          <h4 className="font-semibold mb-2">
+                            Booking Summary
+                          </h4>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Service:
+                            </span>
+                            <span className="font-medium">
+                              {selectedService}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Date:</span>
+                            <span className="font-medium">
+                              {date?.toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Time:</span>
+                            <span className="font-medium">{selectedTime}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Duration:
+                            </span>
+                            <span className="font-medium">
+                              {selectedServiceDetails?.duration}
+                            </span>
+                          </div>
+                          <div className="border-t border-teal-200 pt-2 mt-2">
+                            <div className="flex justify-between">
+                              <span className="font-semibold">Total:</span>
+                              <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
+                                ${selectedServiceDetails?.price}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <Button
+                        className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
+                        size="lg"
+                        onClick={handleBooking}
+                        disabled={!selectedService || !selectedTime}
+                      >
+                        Confirm Booking
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
 
-                <Button
-                  variant="outline"
-                  className="w-full border-teal-200 text-teal-700 hover:bg-teal-50"
-                  onClick={handleSendMessage}
-                >
-                  Message Provider
-                </Button>
+                {/* <Link href={`/messages/${mockProvider.id}`} className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
+                  >
+                    <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
+                    Send Message
+                  </Button>
+                </Link> */}
+
+                <div className="mt-6 pt-6 border-t border-teal-100 space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    </div>
+                    <span className="text-muted-foreground">Instant confirmation</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    </div>
+                    <span className="text-muted-foreground">Free cancellation</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                    </div>
+                    <span className="text-muted-foreground">Verified professional</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
