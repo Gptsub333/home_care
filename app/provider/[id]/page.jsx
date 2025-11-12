@@ -550,7 +550,11 @@ export default function ProviderProfilePage() {
     }
   };
 
-  
+  // Update the "Send Message" button in your return JSX:
+  // Replace this line:
+  // <Link href={`/messages/${mockProvider.id}`} className="block">
+
+  // With this:
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-cyan-50">
@@ -748,8 +752,9 @@ export default function ProviderProfilePage() {
                 </Card>
               </TabsContent>
 
+            
               {/* Reviews Tab - UPDATED */}
-                <TabsContent value="reviews" className="mt-6">
+              <TabsContent value="reviews" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6 space-y-8">
                     {/* Submit Review Section */}
@@ -1082,7 +1087,16 @@ export default function ProviderProfilePage() {
                   </DialogContent>
                 </Dialog>
 
-                   <div className="block" onClick={handleSendMessage}>
+                {/* <Link href={`/messages/${mockProvider.id}`} className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
+                  >
+                    <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
+                    Send Message
+                  </Button>
+                </Link> */}
+                 <div className="block" onClick={handleSendMessage}>
                 <Button
                   variant="outline"
                   className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
@@ -1091,8 +1105,6 @@ export default function ProviderProfilePage() {
                   Send Message
                 </Button>
               </div>
-
-                
 
                 <div className="mt-6 pt-6 border-t border-teal-100 space-y-3">
                   <div className="flex items-center gap-2 text-sm">

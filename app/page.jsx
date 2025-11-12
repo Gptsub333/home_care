@@ -189,6 +189,12 @@ export default function HomePage() {
               Messages
             </Link>
             <Link
+              href="/dashboard/patient/appointments"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Appointments
+            </Link>
+            <Link
               href="/about"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
