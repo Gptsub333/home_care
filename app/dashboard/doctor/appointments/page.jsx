@@ -87,7 +87,7 @@ export default function Appointments({ role = "user" }) {
       alert("Please enter a reason for cancellation.");
       return;
     }
-    handleStatusUpdate(selectedAppointment.id, "CANCEL", cancelReason);
+    handleStatusUpdate(selectedAppointment.id, "CANCELLED", cancelReason);
   };
 
   const upcoming = appointments.filter(
