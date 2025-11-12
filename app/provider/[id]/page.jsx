@@ -25,6 +25,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { format, addMinutes } from "date-fns"; // required for formatting date
+import { Clock } from "lucide-react";
+
 
 // ... (keep all your icon components - StarIcon, MapPinIcon, etc.)
 
@@ -131,11 +133,20 @@ const Share2Icon = ({ className }) => (
 );
 
 const ChevronLeftIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 19l-7-7 7-7"
+    />
   </svg>
 );
-
 
 const mockProvider = {
   id: 1,
@@ -157,7 +168,8 @@ const timeSlots = [
   "3:00 PM",
   "4:00 PM",
 ];
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000/api';
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api";
 
 const services = [
   { name: "General Consultation", price: 150, duration: "30 min" },
@@ -226,9 +238,9 @@ export default function ProviderProfilePage() {
       if (!res.ok) {
         throw new Error("Failed to fetch provider");
       }
-    
+
       const data = await res.json();
-       console.log(data);
+      console.log(data);
       setProvider(data);
     } catch (err) {
       setError("Failed to load provider details");
@@ -332,7 +344,9 @@ export default function ProviderProfilePage() {
       fetchReviews();
     } catch (err) {
       console.error(err);
-      alert(err.message || "Something went wrong while submitting your review.");
+      alert(
+        err.message || "Something went wrong while submitting your review."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -431,58 +445,56 @@ export default function ProviderProfilePage() {
   }, [selectedTime]);
 
   const handleBooking = async () => {
-  if (!selectedService || !date || !selectedTime) {
-    alert("Please select service, date, and time before booking.");
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const res = await fetch(`${BACKEND_URL}/appointments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        providerId: provider?.providerId,
-        serviceType: selectedService,
-        appointmentDate: format(date, "yyyy-MM-dd"),
-        startTime: selectedTime,
-        endTime: endTime,
-        duration: 30,
-        price: provider?.consultationFee || 0,
-        patientNotes: notes || "",
-      }),
-    });
-
-    const data = await res.json();
-
-    // ✅ Handle error response
-    if (!res.ok || data.error) {
-      throw new Error(data.error || "Failed to book appointment");
+    if (!selectedService || !date || !selectedTime) {
+      alert("Please select service, date, and time before booking.");
+      return;
     }
 
-    // ✅ On success
-    setSuccessMessage(data.message || "Appointment booked successfully!");
-    alert(data.message || "Appointment booked successfully!");
+    try {
+      setLoading(true);
+      const res = await fetch(`${BACKEND_URL}/appointments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          providerId: provider?.providerId,
+          serviceType: selectedService,
+          appointmentDate: format(date, "yyyy-MM-dd"),
+          startTime: selectedTime,
+          endTime: endTime,
+          duration: 30,
+          price: provider?.consultationFee || 0,
+          patientNotes: notes || "",
+        }),
+      });
 
-    // reset form
-    setSelectedService("");
-    setSelectedTime("");
-    setDate(null);
-    setNotes("");
-    setIsBookingOpen(false);
+      const data = await res.json();
 
-  } catch (error) {
-    console.error(error);
-    // show API error message
-    alert(error.message || "Booking failed. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-};
+      // ✅ Handle error response
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to book appointment");
+      }
 
+      // ✅ On success
+      setSuccessMessage(data.message || "Appointment booked successfully!");
+      alert(data.message || "Appointment booked successfully!");
+
+      // reset form
+      setSelectedService("");
+      setSelectedTime("");
+      setDate(null);
+      setNotes("");
+      setIsBookingOpen(false);
+    } catch (error) {
+      console.error(error);
+      // show API error message
+      alert(error.message || "Booking failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Helper: convert "10:00 AM" → "10:00"
   const convertTo24Hour = (time12h) => {
@@ -500,50 +512,49 @@ export default function ProviderProfilePage() {
     return <div className="p-10 text-center text-red-600">{error}</div>;
   if (!provider) return <div>No provider found</div>;
 
-// Add this function to your existing ProviderProfilePage component
-// Place it before the return statement
+  // Add this function to your existing ProviderProfilePage component
+  // Place it before the return statement
 
-const handleSendMessage = async () => {
-  try {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      alert('Please login to send messages')
-      window.location.href = '/login'
-      return
+  const handleSendMessage = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login to send messages");
+        window.location.href = "/login";
+        return;
+      }
+
+      // Create or get chat room
+      const response = await fetch(`${BACKEND_URL}/messages/room`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          providerId: provider.providerId, // This is the provider ID from your API
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create chat room");
+      }
+
+      const data = await response.json();
+
+      // Redirect to chat page with room ID
+      window.location.href = `/messages/${data.room.id}`;
+    } catch (error) {
+      console.error("Error creating chat:", error);
+      alert("Failed to start chat. Please try again.");
     }
+  };
 
-    // Create or get chat room
-    const response = await fetch(`${BACKEND_URL}/messages/room`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        providerId: provider.providerId  // This is the provider ID from your API
-      })
-    })
+  // Update the "Send Message" button in your return JSX:
+  // Replace this line:
+  // <Link href={`/messages/${mockProvider.id}`} className="block">
 
-    if (!response.ok) {
-      throw new Error('Failed to create chat room')
-    }
-
-    const data = await response.json()
-    
-    // Redirect to chat page with room ID
-    window.location.href = `/messages/${data.room.id}`
-  } catch (error) {
-    console.error('Error creating chat:', error)
-    alert('Failed to start chat. Please try again.')
-  }
-}
-
-// Update the "Send Message" button in your return JSX:
-// Replace this line:
-// <Link href={`/messages/${mockProvider.id}`} className="block">
-
-// With this:
-
+  // With this:
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-cyan-50">
@@ -558,15 +569,21 @@ const handleSendMessage = async () => {
               MediLux
             </Link>
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-sm hover:text-teal-600 transition-colors">
+              <Link
+                href="/"
+                className="text-sm hover:text-teal-600 transition-colors"
+              >
                 Home
               </Link>
-              <Link href="/search" className="text-sm hover:text-teal-600 transition-colors">
+              <Link
+                href="/search"
+                className="text-sm hover:text-teal-600 transition-colors"
+              >
                 Find Care
               </Link>
-              <Link href="/dashboard/patient" className="text-sm hover:text-teal-600 transition-colors">
+              {/* <Link href="/dashboard/patient" className="text-sm hover:text-teal-600 transition-colors">
                 Dashboard
-              </Link>
+              </Link> */}
               {/* <Link href="/login">
                 <Button
                   variant="outline"
@@ -617,8 +634,13 @@ const handleSendMessage = async () => {
                         </p>
                         <div className="flex items-center justify-center md:justify-start gap-4 flex-wrap">
                           <div className="flex items-center gap-1">
-                            <StarIcon className="h-5 w-5 text-yellow-400" filled />
-                            <span className="font-semibold">{provider.rating}</span>
+                            <StarIcon
+                              className="h-5 w-5 text-yellow-400"
+                              filled
+                            />
+                            <span className="font-semibold">
+                              {provider.rating}
+                            </span>
                             <span className="text-muted-foreground">
                               ({provider.totalReviews} reviews)
                             </span>
@@ -626,10 +648,18 @@ const handleSendMessage = async () => {
                         </div>
                       </div>
                       <div className="flex gap-2 justify-center md:justify-start">
-                        <Button variant="outline" size="icon" className="border-teal-200 hover:bg-teal-50 bg-transparent">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="border-teal-200 hover:bg-teal-50 bg-transparent"
+                        >
                           <HeartIcon className="h-4 w-4 text-teal-600" />
                         </Button>
-                        <Button variant="outline" size="icon" className="border-teal-200 hover:bg-teal-50 bg-transparent">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="border-teal-200 hover:bg-teal-50 bg-transparent"
+                        >
                           <Share2Icon className="h-4 w-4 text-teal-600" />
                         </Button>
                       </div>
@@ -673,14 +703,20 @@ const handleSendMessage = async () => {
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6 space-y-6">
                     <div>
-                      <h3 className="text-xl font-semibold mb-3 text-teal-700">About</h3>
-                      <p className="text-muted-foreground leading-relaxed">{provider.bio}</p>
+                      <h3 className="text-xl font-semibold mb-3 text-teal-700">
+                        About
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {provider.bio}
+                      </p>
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-3 text-teal-700">
                         Education & Credentials
                       </h3>
-                      <p className="text-muted-foreground leading-relaxed">{provider.qualifications}</p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {provider.qualifications}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -690,23 +726,27 @@ const handleSendMessage = async () => {
               <TabsContent value="services" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-semibold mb-4 text-teal-700">Services Offered</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-teal-700">
+                      Services Offered
+                    </h3>
                     <div className="space-y-4">
-                      {provider?.servicesOffered?.split(",").map((service, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
-                        >
-                          <div>
-                            <h4 className="font-semibold mb-1">{service}</h4>
+                      {provider?.servicesOffered
+                        ?.split(",")
+                        .map((service, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between p-4 border border-teal-100 rounded-lg hover:bg-teal-50 transition-colors"
+                          >
+                            <div>
+                              <h4 className="font-semibold mb-1">{service}</h4>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
+                                ${provider.consultationFee}
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
-                              ${provider.consultationFee}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -733,7 +773,9 @@ const handleSendMessage = async () => {
                           >
                             <StarIcon
                               className={`h-6 w-6 ${
-                                star <= rating ? "text-yellow-400" : "text-gray-300"
+                                star <= rating
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
                               }`}
                               filled={star <= rating}
                             />
@@ -763,17 +805,26 @@ const handleSendMessage = async () => {
                       </Button>
 
                       {successMessage && (
-                        <p className="text-green-600 mt-3 text-sm">{successMessage}</p>
+                        <p className="text-green-600 mt-3 text-sm">
+                          {successMessage}
+                        </p>
                       )}
                     </div>
 
                     {/* Reviews List */}
                     <div>
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-semibold text-teal-700">Patient Reviews</h3>
+                        <h3 className="text-xl font-semibold text-teal-700">
+                          Patient Reviews
+                        </h3>
                         <div className="flex items-center gap-2">
-                          <StarIcon className="h-5 w-5 text-yellow-400" filled />
-                          <span className="text-2xl font-bold">{provider.rating}</span>
+                          <StarIcon
+                            className="h-5 w-5 text-yellow-400"
+                            filled
+                          />
+                          <span className="text-2xl font-bold">
+                            {provider.rating}
+                          </span>
                           <span className="text-muted-foreground">
                             ({provider.totalReviews} reviews)
                           </span>
@@ -803,42 +854,50 @@ const handleSendMessage = async () => {
                                   {review.comment}
                                 </p>
                               </div>
-                              </div>
                             </div>
-                          ))}
-                          {/* Pagination */}
-                          {reviewsPagination && reviewsPagination.totalPages > 1 && (
+                          </div>
+                        ))}
+                        {/* Pagination */}
+                        {reviewsPagination &&
+                          reviewsPagination.totalPages > 1 && (
                             <div className="flex items-center justify-center gap-2 mt-6">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                onClick={() =>
+                                  setCurrentPage((prev) =>
+                                    Math.max(1, prev - 1)
+                                  )
+                                }
                                 disabled={currentPage === 1}
                                 className="cursor-pointer"
                               >
                                 Previous
                               </Button>
                               <span className="text-sm text-muted-foreground">
-                                Page {currentPage} of {reviewsPagination.totalPages}
+                                Page {currentPage} of{" "}
+                                {reviewsPagination.totalPages}
                               </span>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
                                   setCurrentPage((prev) =>
-                                    Math.min(reviewsPagination.totalPages, prev + 1)
+                                    Math.min(
+                                      reviewsPagination.totalPages,
+                                      prev + 1
+                                    )
                                   )
                                 }
-                                disabled={currentPage === reviewsPagination.totalPages}
+                                disabled={
+                                  currentPage === reviewsPagination.totalPages
+                                }
                                 className="cursor-pointer"
                               >
                                 Next
                               </Button>
                             </div>
-                        
-                              )}
-                    
-                      
+                          )}
                       </div>
                     </div>
                   </CardContent>
@@ -853,7 +912,9 @@ const handleSendMessage = async () => {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <h2>Book Appointment</h2>
-                  <p className="text-sm text-muted-foreground mb-2">Starting from</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Starting from
+                  </p>
                   <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent mb-1">
                     ${provider.consultationFee}
                   </p>
@@ -925,24 +986,32 @@ const handleSendMessage = async () => {
                         <label className="text-sm font-medium mb-2 block">
                           Select Time
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {timeSlots.map((time) => (
-                            <Button
-                              key={time}
-                              variant={
-                                selectedTime === time ? "default" : "outline"
-                              }
-                              onClick={() => setSelectedTime(time)}
-                              className={
-                                selectedTime === time
-                                  ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer"
-                                  : "cursor-pointer"
-                              }
-                            >
-                              {time}
-                            </Button>
-                          ))}
-                        </div>
+
+                        {timeSlots.length > 0 ? (
+                          <div className="grid grid-cols-3 gap-2">
+                            {timeSlots.map((time) => (
+                              <Button
+                                key={time}
+                                variant={
+                                  selectedTime === time ? "default" : "outline"
+                                }
+                                onClick={() => setSelectedTime(time)}
+                                className={
+                                  selectedTime === time
+                                    ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer text-white"
+                                    : "cursor-pointer"
+                                }
+                              >
+                                {time}
+                              </Button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-xl py-6 bg-gray-50 text-gray-500 text-sm">
+                            <Clock className="h-5 w-5 text-gray-400 mb-2" />
+                            <span>No time slots available on this date</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Notes */}
@@ -1028,19 +1097,25 @@ const handleSendMessage = async () => {
                     <div className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     </div>
-                    <span className="text-muted-foreground">Instant confirmation</span>
+                    <span className="text-muted-foreground">
+                      Instant confirmation
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                     </div>
-                    <span className="text-muted-foreground">Free cancellation</span>
+                    <span className="text-muted-foreground">
+                      Free cancellation
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <div className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center">
                       <div className="w-2 h-2 rounded-full bg-purple-500"></div>
                     </div>
-                    <span className="text-muted-foreground">Verified professional</span>
+                    <span className="text-muted-foreground">
+                      Verified professional
+                    </span>
                   </div>
                 </div>
               </CardContent>

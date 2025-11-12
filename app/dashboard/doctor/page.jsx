@@ -555,7 +555,7 @@ export default function CompleteSettingsPage() {
               //     </CardContent>
               //   </Card>
               // </div>
-              <Appointments role="doctor" />
+              <Appointments />
             )}
 
             {/* Earnings Tab */}

@@ -1,6 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Calendar, Clock, MapPin, CheckCircle, XCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  CheckCircle,
+  XCircle,
+  PlusCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -14,6 +21,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+
 
 export default function Appointments({ role = "user" }) {
   const BACKEND_URL =
@@ -25,6 +34,21 @@ export default function Appointments({ role = "user" }) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [bookDialogOpen, setBookDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedSlots, setSelectedSlots] = useState([]);
+
+  const timeOptions = [
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "01:00 PM",
+    "02:00 PM",
+    "03:00 PM",
+    "04:00 PM",
+    "05:00 PM",
+  ];
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -90,6 +114,59 @@ export default function Appointments({ role = "user" }) {
     handleStatusUpdate(selectedAppointment.id, "CANCELLED", cancelReason);
   };
 
+  // Slot Booking Logic
+  const openBookDialog = () => {
+    setBookDialogOpen(true);
+    setSelectedDate("");
+    setSelectedSlots([]);
+  };
+
+  const toggleSlot = (time) => {
+    setSelectedSlots((prev) =>
+      prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
+    );
+  };
+
+  const saveAvailability = async () => {
+    if (!selectedDate) {
+      alert("Please select a date.");
+      return;
+    }
+    if (selectedSlots.length === 0) {
+      alert("Please select at least one time slot.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${BACKEND_URL}/appointments/provider/availability`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            date: selectedDate,
+            availableSlots: selectedSlots,
+            isAvailable: true,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.message || "Failed to set availability");
+
+      alert("Availability saved successfully!");
+      setBookDialogOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  };
+
   const upcoming = appointments.filter(
     (a) => a.status === "PENDING" || a.status === "CONFIRMED"
   );
@@ -116,6 +193,10 @@ export default function Appointments({ role = "user" }) {
   return (
     <div className="max-w-5xl mx-auto py-10 space-y-6">
       <h1 className="text-3xl font-bold text-center mb-6">My Appointments</h1>
+      <Button onClick={openBookDialog} className="flex items-center gap-2">
+        <PlusCircle className="w-4 h-4" />
+        Book Slot
+      </Button>
 
       <Tabs defaultValue="upcoming">
         <TabsList className="w-full justify-center">
@@ -295,6 +376,59 @@ export default function Appointments({ role = "user" }) {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* 📅 Book Slot Dialog */}
+      <Dialog open={bookDialogOpen} onOpenChange={setBookDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set Available Slots</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Select Date
+              </label>
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Select Time Slots
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {timeOptions.map((time) => (
+                  <Button
+                    key={time}
+                    variant={
+                      selectedSlots.includes(time) ? "default" : "outline"
+                    }
+                    onClick={() => toggleSlot(time)}
+                    className={
+                      selectedSlots.includes(time)
+                        ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white"
+                        : ""
+                    }
+                  >
+                    {time}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setBookDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveAvailability}>Save Slots</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Cancel Dialog */}
       <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

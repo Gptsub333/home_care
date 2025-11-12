@@ -440,7 +440,7 @@ export default function PatientDashboard() {
               //     </TabsContent>
               //   </Tabs>
               // </div>
-              <Appointments role="provider" />
+              <Appointments />
             )}
 
             {/* Favorites Tab */}

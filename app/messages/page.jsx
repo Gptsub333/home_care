@@ -318,6 +318,12 @@ export default function MessagesPage() {
               <Link href="/messages" className="text-sm font-semibold text-teal-600 transition-colors">
                 Messages {unreadCount > 0 && `(${unreadCount})`}
               </Link>
+              <Link
+                href="/dashboard/patient/appointments"
+                className="text-sm hover:text-primary transition-colors"
+              >
+                Appointments
+              </Link>
               <Link href="/dashboard/patient" className="text-sm hover:text-primary transition-colors">
                 Dashboard
               </Link>
