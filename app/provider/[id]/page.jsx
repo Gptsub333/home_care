@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { format, addMinutes } from "date-fns"; // required for formatting date
 
 const StarIcon = ({ className, filled }) => (
   <svg
@@ -203,12 +204,21 @@ const timeSlots = [
   "4:00 PM",
 ];
 
+const services = [
+  { name: "General Consultation", price: 150, duration: "30 min" },
+  { name: "Comprehensive Physical", price: 250, duration: "60 min" },
+  { name: "Follow-up Visit", price: 100, duration: "20 min" },
+  { name: "Urgent Care", price: 200, duration: "45 min" },
+];
+
 export default function ProviderProfilePage() {
   const { id } = useParams();
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
   const BACKEND_URL =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     "https://home-care-backend.onrender.com/api";
+
+  const [token, setToken] = useState(null);
 
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -219,12 +229,22 @@ export default function ProviderProfilePage() {
   const [selectedService, setSelectedService] = useState("");
   const [notes, setNotes] = useState("");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [endTime, setEndTime] = useState("");
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [reviews, setReviews] = useState([]);
+
+  // ================== LOCALSTORAGE FIX ==================
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token");
+      setToken(storedToken);
+    }
+  }, []);
 
   const fetchReviews = async (providerId) => {
     try {
@@ -317,23 +337,124 @@ export default function ProviderProfilePage() {
 
   console.log("userId---", id);
 
-  const handleBooking = () => {
-    console.log("[v0] Booking:", {
-      date,
-      selectedTime,
-      selectedService,
-      notes,
-    });
-    setIsBookingOpen(false);
-    // Reset form
-    setSelectedTime("");
-    setSelectedService("");
-    setNotes("");
-  };
+  // const handleBooking = () => {
+  //   console.log("[v0] Booking:", {
+  //     date,
+  //     selectedTime,
+  //     selectedService,
+  //     notes,
+  //   });
+  //   setIsBookingOpen(false);
+  //   // Reset form
+  //   setSelectedTime("");
+  //   setSelectedService("");
+  //   setNotes("");
+  // };
 
-  const selectedServiceDetails = mockProvider.services.find(
+  const selectedServiceDetails = services.find(
     (s) => s.name === selectedService
   );
+
+  // =================== FETCH AVAILABLE SLOTS ===================
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!date || !provider?.providerId) return;
+      try {
+        const res = await fetch(
+          `${BACKEND_URL}/appointments/availability/${
+            provider?.providerId
+          }/slots?date=${format(date, "yyyy-MM-dd")}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "Failed to fetch available slots");
+        setTimeSlots(data.slots || []);
+      } catch (err) {
+        console.error(err);
+        setTimeSlots([]);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [date, provider?.providerId]);
+
+  useEffect(() => {
+    if (!selectedTime) return;
+
+    // Convert selectedTime (e.g., "10:00 AM") to 24hr Date object
+    const start24 = convertTo24Hour(selectedTime);
+    const startDateTime = new Date(`1970-01-01T${start24}`);
+    const end = addMinutes(startDateTime, 30);
+    const formattedEnd = format(end, "hh:mm a");
+    setEndTime(formattedEnd);
+  }, [selectedTime]);
+
+  const handleBooking = async () => {
+  if (!selectedService || !date || !selectedTime) {
+    alert("Please select service, date, and time before booking.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await fetch(`${BACKEND_URL}/appointments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        providerId: provider?.providerId,
+        serviceType: selectedService,
+        appointmentDate: format(date, "yyyy-MM-dd"),
+        startTime: selectedTime,
+        endTime: endTime,
+        duration: 30,
+        price: provider?.consultationFee || 0,
+        patientNotes: notes || "",
+      }),
+    });
+
+    const data = await res.json();
+
+    // ✅ Handle error response
+    if (!res.ok || data.error) {
+      throw new Error(data.error || "Failed to book appointment");
+    }
+
+    // ✅ On success
+    setSuccessMessage(data.message || "Appointment booked successfully!");
+    alert(data.message || "Appointment booked successfully!");
+
+    // reset form
+    setSelectedService("");
+    setSelectedTime("");
+    setDate(null);
+    setNotes("");
+    setIsBookingOpen(false);
+
+  } catch (error) {
+    console.error(error);
+    // show API error message
+    alert(error.message || "Booking failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // Helper: convert "10:00 AM" → "10:00"
+  const convertTo24Hour = (time12h) => {
+    const [time, modifier] = time12h.split(" ");
+    let [hours, minutes] = time.split(":");
+    hours = parseInt(hours);
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+    return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  };
 
   if (loading)
     return <div className="p-10 text-center text-lg">Loading provider...</div>;
@@ -747,7 +868,7 @@ export default function ProviderProfilePage() {
                     Starting from
                   </p>
                   <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent mb-1">
-                    ${mockProvider.price}
+                    ${provider.consultationFee}
                   </p>
                   <p className="text-sm text-muted-foreground">per visit</p>
                 </div>
@@ -768,7 +889,7 @@ export default function ProviderProfilePage() {
                         Book Appointment
                       </DialogTitle>
                       <DialogDescription>
-                        Schedule your visit with {mockProvider.name}
+                        Schedule your visit with {provider.name}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-6 py-4">
@@ -785,13 +906,12 @@ export default function ProviderProfilePage() {
                             <SelectValue placeholder="Choose a service" />
                           </SelectTrigger>
                           <SelectContent>
-                            {mockProvider.services.map((service) => (
+                            {services.map((service) => (
                               <SelectItem
                                 key={service.name}
                                 value={service.name}
                               >
-                                {service.name} - ${service.price} (
-                                {service.duration})
+                                {service.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -828,7 +948,7 @@ export default function ProviderProfilePage() {
                               className={
                                 selectedTime === time
                                   ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer"
-                                  : ""
+                                  : "cursor-pointer"
                               }
                             >
                               {time}
@@ -905,7 +1025,7 @@ export default function ProviderProfilePage() {
                   </DialogContent>
                 </Dialog>
 
-                <Link href={`/messages/${mockProvider.id}`} className="block">
+                {/* <Link href={`/messages/${mockProvider.id}`} className="block">
                   <Button
                     variant="outline"
                     className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
@@ -913,7 +1033,7 @@ export default function ProviderProfilePage() {
                     <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
                     Send Message
                   </Button>
-                </Link>
+                </Link> */}
 
                 <div className="mt-6 pt-6 border-t border-teal-100 space-y-3">
                   <div className="flex items-center gap-2 text-sm">
