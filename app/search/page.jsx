@@ -226,7 +226,7 @@ export default function SearchPage() {
         : [...prev, service]
     );
   };
-
+  console.log("filteredProviders---", providers);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}

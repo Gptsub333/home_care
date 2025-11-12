@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  setIsLoading(true);
     try {
       const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
         method: 'POST',
@@ -42,6 +42,8 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Login error:', error);
       alert('Something went wrong');
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -177,13 +179,17 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              <Button
+             <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600"
+                className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600 flex items-center justify-center gap-2"
                 disabled={isLoading}
               >
+                {isLoading && (
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                )}
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
+
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">

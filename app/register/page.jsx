@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [isLoading , setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -104,6 +105,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (!formData.profileImage || !formData.profileImageKey) {
       setImageUpload((prev) => ({
         ...prev,
@@ -119,6 +121,8 @@ export default function RegisterPage() {
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -477,12 +481,17 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600"
-              >
-                Create Account
-              </Button>
+             <Button
+  type="submit"
+  disabled={isLoading}
+  className="w-full h-12 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:from-teal-600 hover:to-blue-600 flex items-center justify-center gap-2"
+>
+  {isLoading && (
+    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+  )}
+  {isLoading ? "Creating..." : "Create Account"}
+</Button>
+
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
