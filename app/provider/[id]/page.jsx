@@ -752,6 +752,7 @@ export default function ProviderProfilePage() {
                 </Card>
               </TabsContent>
 
+            
               {/* Reviews Tab - UPDATED */}
               <TabsContent value="reviews" className="mt-6">
                 <Card className="border-teal-100 shadow-lg">
@@ -773,9 +774,7 @@ export default function ProviderProfilePage() {
                           >
                             <StarIcon
                               className={`h-6 w-6 ${
-                                star <= rating
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
+                                star <= rating ? "text-yellow-400" : "text-gray-300"
                               }`}
                               filled={star <= rating}
                             />
@@ -805,100 +804,106 @@ export default function ProviderProfilePage() {
                       </Button>
 
                       {successMessage && (
-                        <p className="text-green-600 mt-3 text-sm">
-                          {successMessage}
-                        </p>
+                        <p className="text-green-600 mt-3 text-sm">{successMessage}</p>
                       )}
                     </div>
 
                     {/* Reviews List */}
                     <div>
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-semibold text-teal-700">
-                          Patient Reviews
-                        </h3>
+                        <h3 className="text-xl font-semibold text-teal-700">Patient Reviews</h3>
                         <div className="flex items-center gap-2">
-                          <StarIcon
-                            className="h-5 w-5 text-yellow-400"
-                            filled
-                          />
-                          <span className="text-2xl font-bold">
-                            {provider.rating}
-                          </span>
+                          <StarIcon className="h-5 w-5 text-yellow-400" filled />
+                          <span className="text-2xl font-bold">{provider.rating}</span>
                           <span className="text-muted-foreground">
                             ({provider.totalReviews} reviews)
                           </span>
                         </div>
                       </div>
 
-                      <div className="space-y-6">
-                        {reviews.map((review) => (
-                          <div
-                            key={review.id}
-                            className="border-b border-teal-100 last:border-0 pb-6 last:pb-0"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-400 flex items-center justify-center font-semibold text-white">
-                                  {review?.patient?.charAt(0)}
-                                </div>
-                                <div>
-                                  <p className="font-semibold">
-                                    {review?.patient}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {review?.createdAt}
-                                  </p>
+                      {reviewsLoading ? (
+                        <div className="text-center py-8">Loading reviews...</div>
+                      ) : reviews.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          No reviews yet. Be the first to review!
+                        </div>
+                      ) : (
+                        <>
+                          <div className="space-y-6">
+                            {reviews.map((review) => (
+                              <div
+                                key={review.id}
+                                className="border-b border-teal-100 last:border-0 pb-6 last:pb-0"
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    {review.patientImage ? (
+                                      <img
+                                        src={review.patientImage}
+                                        alt={review.patient}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-400 flex items-center justify-center font-semibold text-white">
+                                        {review.patient.charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <p className="font-semibold">{review.patient}</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {review.timeAgo}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    {Array.from({ length: review.rating }).map((_, i) => (
+                                      <StarIcon
+                                        key={i}
+                                        className="h-4 w-4 text-yellow-400"
+                                        filled
+                                      />
+                                    ))}
+                                  </div>
                                 </div>
                                 <p className="text-muted-foreground leading-relaxed">
                                   {review.comment}
                                 </p>
                               </div>
-                            </div>
+                            ))}
                           </div>
-                        ))}
-                        {/* Pagination */}
-                        {reviewsPagination &&
-                          reviewsPagination.totalPages > 1 && (
+
+                          {/* Pagination */}
+                          {reviewsPagination && reviewsPagination.totalPages > 1 && (
                             <div className="flex items-center justify-center gap-2 mt-6">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() =>
-                                  setCurrentPage((prev) =>
-                                    Math.max(1, prev - 1)
-                                  )
-                                }
+                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
                                 className="cursor-pointer"
                               >
                                 Previous
                               </Button>
                               <span className="text-sm text-muted-foreground">
-                                Page {currentPage} of{" "}
-                                {reviewsPagination.totalPages}
+                                Page {currentPage} of {reviewsPagination.totalPages}
                               </span>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
                                   setCurrentPage((prev) =>
-                                    Math.min(
-                                      reviewsPagination.totalPages,
-                                      prev + 1
-                                    )
+                                    Math.min(reviewsPagination.totalPages, prev + 1)
                                   )
                                 }
-                                disabled={
-                                  currentPage === reviewsPagination.totalPages
-                                }
+                                disabled={currentPage === reviewsPagination.totalPages}
                                 className="cursor-pointer"
                               >
                                 Next
                               </Button>
                             </div>
                           )}
-                      </div>
+                        </>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1091,6 +1096,15 @@ export default function ProviderProfilePage() {
                     Send Message
                   </Button>
                 </Link> */}
+                 <div className="block" onClick={handleSendMessage}>
+                <Button
+                  variant="outline"
+                  className="w-full border-teal-200 hover:bg-teal-50 bg-transparent cursor-pointer"
+                >
+                  <MessageCircleIcon className="h-4 w-4 mr-2 text-teal-600" />
+                  Send Message
+                </Button>
+              </div>
 
                 <div className="mt-6 pt-6 border-t border-teal-100 space-y-3">
                   <div className="flex items-center gap-2 text-sm">
