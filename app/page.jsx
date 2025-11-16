@@ -194,7 +194,7 @@ export default function HomePage() {
             >
               Appointments
             </Link>
-            <Link
+            {/* <Link
               href="/about"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
@@ -205,7 +205,7 @@ export default function HomePage() {
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Contact
-            </Link>
+            </Link> */}
             {/* <LogoutButton /> */}
           </nav>
 
