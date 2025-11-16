@@ -266,7 +266,7 @@ export default function Appointments({ role = "user" }) {
 
                     <div className="mt-4 flex justify-between items-center">
                       <span className="font-medium text-sm">
-                        Fee: ₹{apt.price}
+                        Fee: ${apt.price}
                       </span>
                       <div className="flex gap-2">
                         {apt.status === "PENDING" && (
