@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Calendar,
   Clock,
@@ -16,100 +16,100 @@ import {
   // AvatarFallback,
   // AvatarImage,
   Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import Appointments from './appointments/page';
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import Appointments from "./appointments/page";
 
 const mockTodayAppointments = [
   {
     id: 1,
-    patient: 'John Doe',
-    service: 'General Consultation',
-    time: '10:00 AM',
-    status: 'confirmed',
-    address: '123 Main St, Manhattan',
+    patient: "John Doe",
+    service: "General Consultation",
+    time: "10:00 AM",
+    status: "confirmed",
+    address: "123 Main St, Manhattan",
   },
   {
     id: 2,
-    patient: 'Maria Smith',
-    service: 'Follow-up Visit',
-    time: '2:00 PM',
-    status: 'confirmed',
-    address: '456 Park Ave, Brooklyn',
+    patient: "Maria Smith",
+    service: "Follow-up Visit",
+    time: "2:00 PM",
+    status: "confirmed",
+    address: "456 Park Ave, Brooklyn",
   },
 ];
 
 const mockUpcomingAppointments = [
   {
     id: 3,
-    patient: 'David Lee',
-    service: 'Comprehensive Physical',
-    date: '2024-01-26',
-    time: '11:00 AM',
-    status: 'pending',
+    patient: "David Lee",
+    service: "Comprehensive Physical",
+    date: "2024-01-26",
+    time: "11:00 AM",
+    status: "pending",
   },
   {
     id: 4,
-    patient: 'Sarah Johnson',
-    service: 'Urgent Care',
-    date: '2024-01-27',
-    time: '3:00 PM',
-    status: 'confirmed',
+    patient: "Sarah Johnson",
+    service: "Urgent Care",
+    date: "2024-01-27",
+    time: "3:00 PM",
+    status: "confirmed",
   },
 ];
 
 const mockReviews = [
   {
     id: 1,
-    patient: 'John D.',
+    patient: "John D.",
     rating: 5,
-    date: '2 days ago',
-    comment: 'Excellent service! Very professional and caring.',
+    date: "2 days ago",
+    comment: "Excellent service! Very professional and caring.",
   },
   {
     id: 2,
-    patient: 'Maria S.',
+    patient: "Maria S.",
     rating: 5,
-    date: '1 week ago',
-    comment: 'Great experience. Highly recommend!',
+    date: "1 week ago",
+    comment: "Great experience. Highly recommend!",
   },
 ];
 export default function CompleteSettingsPage() {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const [userData, setUserData] = React.useState(null);
-  const [activeTab, setActiveTab] = React.useState('overview');
+  const [activeTab, setActiveTab] = React.useState("overview");
   const [formData, setFormData] = React.useState({
     // User fields
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
 
     // Provider fields
-    specialty: '',
-    licenseId: '',
-    npiNumber: '',
-    credentials: '',
-    county: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    yearsOfExperience: '',
-    qualifications: '',
-    bio: '',
-    servicesOffered: '',
-    consultationFee: '',
-    practiceAddress: '',
+    specialty: "",
+    licenseId: "",
+    npiNumber: "",
+    credentials: "",
+    county: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    yearsOfExperience: "",
+    qualifications: "",
+    bio: "",
+    servicesOffered: "",
+    consultationFee: "",
+    practiceAddress: "",
     isAvailableToday: false,
-    profileImage: '',
-    profileImageKey: '',
+    profileImage: "",
+    profileImageKey: "",
   });
   const [imageUpload, setImageUpload] = React.useState({
     loading: false,
@@ -124,9 +124,9 @@ export default function CompleteSettingsPage() {
   const fetchUserData = async () => {
     try {
       // Get user from localStorage
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       if (!storedUser) {
-        window.location.href = '/login';
+        window.location.href = "/login";
         return;
       }
 
@@ -146,54 +146,166 @@ export default function CompleteSettingsPage() {
       // Populate form with existing data
       setFormData({
         // User fields
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        address: data.address || '',
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        address: data.address || "",
 
         // Provider fields
-        specialty: data.provider?.specialty || '',
-        licenseId: data.provider?.licenseId || '',
-        npiNumber: data.provider?.npiNumber || '',
-        credentials: data.provider?.credentials || '',
-        county: data.provider?.county || '',
-        city: data.provider?.city || '',
-        state: data.provider?.state || '',
-        zipCode: data.provider?.zipCode || '',
-        yearsOfExperience: data.provider?.yearsOfExperience || '',
-        qualifications: data.provider?.qualifications || '',
-        bio: data.provider?.bio || '',
-        servicesOffered: data.provider?.servicesOffered || '',
-        consultationFee: data.provider?.consultationFee || '',
-        practiceAddress: data.provider?.practiceAddress || '',
+        specialty: data.provider?.specialty || "",
+        licenseId: data.provider?.licenseId || "",
+        npiNumber: data.provider?.npiNumber || "",
+        credentials: data.provider?.credentials || "",
+        county: data.provider?.county || "",
+        city: data.provider?.city || "",
+        state: data.provider?.state || "",
+        zipCode: data.provider?.zipCode || "",
+        yearsOfExperience: data.provider?.yearsOfExperience || "",
+        qualifications: data.provider?.qualifications || "",
+        bio: data.provider?.bio || "",
+        servicesOffered: data.provider?.servicesOffered || "",
+        consultationFee: data.provider?.consultationFee || "",
+        practiceAddress: data.provider?.practiceAddress || "",
         isAvailableToday: data.provider?.isAvailableToday || false,
-        profileImage: data.provider?.profileImage || '',
-        profileImageKey: data.provider?.profileImageKey || '',
+        profileImage: data.provider?.profileImage || "",
+        profileImageKey: data.provider?.profileImageKey || "",
       });
 
       if (data.provider?.profileImage) {
-        setImageUpload((prev) => ({ ...prev, preview: data.provider.profileImage }));
+        setImageUpload((prev) => ({
+          ...prev,
+          preview: data.provider.profileImage,
+        }));
       }
 
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      alert('Failed to load user data');
+      console.error("Error fetching user data:", error);
+      alert("Failed to load user data");
       setLoading(false);
     }
   };
+
+  // overview dashboard
+
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState("");
+  const [todayAppointments, setTodayAppointments] = useState([]);
+  const [counts, setCounts] = useState({ today: 0, total: 0 });
+  const [averageRating, setAverageRating] = useState(0);
+  const [ratings, setRatings] = useState([]);
+
+  const getDaysAgo = (dateStr) => {
+    const days = Math.floor(
+      (Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (days === 0) return "Today";
+    if (days === 1) return "1 day ago";
+    if (days < 7) return `${days} days ago`;
+    const weeks = Math.floor(days / 7);
+    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  };
+
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "https://home-care-backend.onrender.com/api";
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${BACKEND_URL}/appointments/my-appointments`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (data.appointments) {
+          // Get today's date
+          const today = new Date().toISOString().split("T")[0];
+
+          // Filter today's appointments
+          const todayList = data.appointments.filter((appt) => {
+            const apptDate = new Date(appt.appointmentDate)
+              .toISOString()
+              .split("T")[0];
+            return apptDate === today;
+          });
+
+          setTodayAppointments(todayList);
+          setCounts({
+            today: todayList.length,
+            total: data.appointments.length,
+          });
+
+          // ✅ Extract ratings from provider info
+          // const ratingList = data.appointments
+          //   .map((appt) => Number(appt.provider?.rating))
+          //   .filter((r) => !isNaN(r));
+
+          const completed = data?.appointments
+            .filter((appt) => appt.status === "COMPLETED")
+            .map((appt) => ({
+              id: appt.id,
+              name: appt.provider?.user?.name || "Unknown",
+              rating: parseFloat(appt.provider?.rating || 0),
+              totalReviews: appt.provider?.totalReviews || 0,
+              comment:
+                appt.patientNotes ||
+                "Excellent service! Very professional and caring.",
+              daysAgo: getDaysAgo(appt.updatedAt),
+              profileImage: appt.provider?.profileImage || "",
+            }));
+
+          setRatings(completed);
+
+          // ✅ Calculate average rating
+          if (completed.length > 0) {
+            const avg =
+              completed.reduce((sum, r) => sum + (r.rating || 0), 0) /
+              completed.length;
+            setAverageRating(parseFloat(avg.toFixed(1))); // round to 1 decimal
+          } else {
+            setAverageRating(0);
+          }
+        } else {
+          setError("No appointments found");
+        }
+      } catch (err) {
+        setError("Failed to fetch appointments");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+
+  if (loading)
+    return <div className="text-center py-10 text-gray-500">Loading...</div>;
+  if (error)
+    return <div className="text-center py-10 text-red-500">{error}</div>;
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setImageUpload((prev) => ({ ...prev, error: 'Please select a valid image file' }));
+    if (!file.type.startsWith("image/")) {
+      setImageUpload((prev) => ({
+        ...prev,
+        error: "Please select a valid image file",
+      }));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setImageUpload((prev) => ({ ...prev, error: 'Image size should be less than 5MB' }));
+      setImageUpload((prev) => ({
+        ...prev,
+        error: "Image size should be less than 5MB",
+      }));
       return;
     }
 
@@ -207,17 +319,20 @@ export default function CompleteSettingsPage() {
 
     try {
       const uploadFormData = new FormData();
-      uploadFormData.append('image', file);
+      uploadFormData.append("image", file);
 
-      const response = await fetch('https://home-care-backend.onrender.com/api/upload/image', {
-        method: 'POST',
-        body: uploadFormData,
-      });
+      const response = await fetch(
+        "https://home-care-backend.onrender.com/api/upload/image",
+        {
+          method: "POST",
+          body: uploadFormData,
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Image upload failed');
+        throw new Error(data.message || "Image upload failed");
       }
 
       console.log(data);
@@ -233,14 +348,14 @@ export default function CompleteSettingsPage() {
           error: null,
         }));
       } else {
-        throw new Error('Invalid response from server');
+        throw new Error("Invalid response from server");
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       setImageUpload((prev) => ({
         ...prev,
         loading: false,
-        error: error.message || 'Failed to upload image',
+        error: error.message || "Failed to upload image",
         preview: formData.profileImage || null,
       }));
     }
@@ -254,30 +369,33 @@ export default function CompleteSettingsPage() {
       const userId = userData.id;
 
       // Update user data
-      const response = await fetch(`https://home-care-backend.onrender.com/api/providers/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `https://home-care-backend.onrender.com/api/providers/profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update profile');
+        throw new Error(data.message || "Failed to update profile");
       }
 
       // Update localStorage
       const updatedUser = { ...userData, ...data };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      alert('Profile updated successfully!');
+      alert("Profile updated successfully!");
       setSaving(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert(error.message || 'Failed to update profile');
+      console.error("Error updating profile:", error);
+      alert(error.message || "Failed to update profile");
       setSaving(false);
     }
   };
@@ -288,20 +406,20 @@ export default function CompleteSettingsPage() {
     //   credentials: 'include',
     // });
 
-    const role = localStorage.getItem('role');
+    const role = localStorage.getItem("role");
     // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token'); // if you store token separately
-    localStorage.removeItem('role');
+    localStorage.removeItem("user");
+    localStorage.removeItem("token"); // if you store token separately
+    localStorage.removeItem("role");
 
     // Clear cookie
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
 
     // Redirect to login
-    if (role === 'doctor') {
-      window.location.href = '/doctor/login';
+    if (role === "doctor") {
+      window.location.href = "/doctor/login";
     } else {
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   };
 
@@ -321,61 +439,68 @@ export default function CompleteSettingsPage() {
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 border-r bg-card min-h-screen p-6 hidden lg:block">
-          <Link href="/" className="text-2xl font-serif font-bold text-primary mb-8 block">
+          <Link
+            href="/"
+            className="text-2xl font-serif font-bold text-primary mb-8 block"
+          >
             MediLux
           </Link>
           <nav className="space-y-2">
             <Button
-              variant={activeTab === 'overview' ? 'default' : 'ghost'}
+              variant={activeTab === "overview" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('overview')}
+              onClick={() => setActiveTab("overview")}
             >
               <Home className="h-4 w-4 mr-2" />
               Overview
             </Button>
             <Button
-              variant={activeTab === 'appointments' ? 'default' : 'ghost'}
+              variant={activeTab === "appointments" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('appointments')}
+              onClick={() => setActiveTab("appointments")}
             >
               <Calendar className="h-4 w-4 mr-2" />
               Appointments
             </Button>
             <Button
-              variant={activeTab === 'earnings' ? 'default' : 'ghost'}
+              variant={activeTab === "earnings" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('earnings')}
+              onClick={() => setActiveTab("earnings")}
             >
               <DollarSign className="h-4 w-4 mr-2" />
               Earnings
             </Button>
             <Button
-              variant={activeTab === 'reviews' ? 'default' : 'ghost'}
+              variant={activeTab === "reviews" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('reviews')}
+              onClick={() => setActiveTab("reviews")}
             >
               <Star className="h-4 w-4 mr-2" />
               Reviews
             </Button>
             <Button
-              variant={activeTab === 'messages' ? 'default' : 'ghost'}
+              variant={activeTab === "messages" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('messages')}
+              onClick={() => setActiveTab("messages")}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Messages
             </Button>
             <Button
-              variant={activeTab === 'settings' ? 'default' : 'ghost'}
+              variant={activeTab === "settings" ? "default" : "ghost"}
               className="w-full justify-start"
-              onClick={() => setActiveTab('settings')}
+              onClick={() => setActiveTab("settings")}
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </Button>
           </nav>
           <div className="mt-auto pt-6 border-t">
-            <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground">
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -388,8 +513,12 @@ export default function CompleteSettingsPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-serif font-bold mb-2">Doctor Dashboard</h1>
-                <p className="text-muted-foreground">Welcome back, {formData.name}</p>
+                <h1 className="text-3xl font-serif font-bold mb-2">
+                  Doctor Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                  Welcome back, {formData.name}
+                </p>
               </div>
               <Link href="/profile">
                 {/* <Avatar className="h-12 w-12">
@@ -400,7 +529,7 @@ export default function CompleteSettingsPage() {
             </div>
 
             {/* Overview Tab */}
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
               <div className="space-y-6">
                 {/* Stats */}
                 <div className="grid md:grid-cols-4 gap-6">
@@ -408,8 +537,10 @@ export default function CompleteSettingsPage() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Today</p>
-                          <p className="text-3xl font-bold">2</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Today
+                          </p>
+                          <p className="text-3xl font-bold">{counts?.today}</p>
                         </div>
                         <Calendar className="h-8 w-8 text-primary" />
                       </div>
@@ -419,8 +550,10 @@ export default function CompleteSettingsPage() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">This Month</p>
-                          <p className="text-3xl font-bold">45</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            This Month
+                          </p>
+                          <p className="text-3xl font-bold">{counts?.total}</p>
                         </div>
                         <Users className="h-8 w-8 text-primary" />
                       </div>
@@ -430,8 +563,10 @@ export default function CompleteSettingsPage() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Earnings</p>
-                          <p className="text-3xl font-bold">$6.8K</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Earnings
+                          </p>
+                          <p className="text-3xl font-bold">$0</p>
                         </div>
                         <DollarSign className="h-8 w-8 text-primary" />
                       </div>
@@ -441,8 +576,10 @@ export default function CompleteSettingsPage() {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Rating</p>
-                          <p className="text-3xl font-bold">4.9</p>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Rating
+                          </p>
+                          <p className="text-3xl font-bold">{averageRating}</p>
                         </div>
                         <Star className="h-8 w-8 text-primary" />
                       </div>
@@ -456,27 +593,42 @@ export default function CompleteSettingsPage() {
                     <CardTitle>Today's Schedule</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {mockTodayAppointments.map((apt) => (
-                      <div key={apt.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
-                            {apt.patient
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
+                    {todayAppointments.length &&
+                      todayAppointments.map((apt) => (
+                        <div
+                          key={apt.id}
+                          className="flex items-center justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
+                              {apt.provider?.user?.name
+                                ?.split(" ")
+                                .map((word) => word.charAt(0))
+                                .join("") || "U"}{" "}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold mb-1">
+                                {apt.provider?.user?.name}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {apt?.serviceType}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {apt?.provider?.city}, {apt?.provider?.state},{" "}
+                                {apt?.provider?.county}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold mb-1">{apt.patient}</h4>
-                            <p className="text-sm text-muted-foreground">{apt.service}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{apt.address}</p>
+                          <div className="text-right">
+                            <p className="font-semibold mb-2">
+                              {apt?.startTime}
+                            </p>
+                            <Badge className="bg-green-500/10 text-green-700">
+                              {apt?.status}
+                            </Badge>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold mb-2">{apt.time}</p>
-                          <Badge className="bg-green-500/10 text-green-700">{apt.status}</Badge>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
                   </CardContent>
                 </Card>
 
@@ -486,25 +638,39 @@ export default function CompleteSettingsPage() {
                     <CardTitle>Recent Reviews</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {mockReviews.map((review) => (
-                      <div key={review.id} className="border-b last:border-0 pb-4 last:pb-0">
+                    {ratings.map((review) => (
+                      <div
+                        key={review.id}
+                        className="border-b last:border-0 pb-4 last:pb-0"
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary text-sm">
-                              {review.patient.charAt(0)}
+                              {review.name.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-sm">{review.patient}</p>
-                              <p className="text-xs text-muted-foreground">{review.date}</p>
+                              <p className="font-semibold text-sm">
+                                {review.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {review.daysAgo}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
-                            {Array.from({ length: review.rating }).map((_, i) => (
-                              <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
+                            {Array.from({ length: review?.rating }).map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                                />
+                              )
+                            )}
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{review.comment}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {review.comment}
+                        </p>
                       </div>
                     ))}
                   </CardContent>
@@ -513,7 +679,7 @@ export default function CompleteSettingsPage() {
             )}
 
             {/* Appointments Tab */}
-            {activeTab === 'appointments' && (
+            {activeTab === "appointments" && (
               // <div className="space-y-6">
               //   <Card>
               //     <CardHeader>
@@ -559,12 +725,14 @@ export default function CompleteSettingsPage() {
             )}
 
             {/* Earnings Tab */}
-            {activeTab === 'earnings' && (
+            {activeTab === "earnings" && (
               <div className="space-y-6">
                 <div className="grid md:grid-cols-3 gap-6">
                   <Card>
                     <CardContent className="p-6">
-                      <p className="text-sm text-muted-foreground mb-2">This Week</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        This Week
+                      </p>
                       <p className="text-3xl font-bold mb-1">$1,850</p>
                       <p className="text-sm text-green-600 flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
@@ -574,7 +742,9 @@ export default function CompleteSettingsPage() {
                   </Card>
                   <Card>
                     <CardContent className="p-6">
-                      <p className="text-sm text-muted-foreground mb-2">This Month</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        This Month
+                      </p>
                       <p className="text-3xl font-bold mb-1">$6,800</p>
                       <p className="text-sm text-green-600 flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
@@ -584,7 +754,9 @@ export default function CompleteSettingsPage() {
                   </Card>
                   <Card>
                     <CardContent className="p-6">
-                      <p className="text-sm text-muted-foreground mb-2">Total Earnings</p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Total Earnings
+                      </p>
                       <p className="text-3xl font-bold mb-1">$42,500</p>
                       <p className="text-sm text-muted-foreground">All time</p>
                     </CardContent>
@@ -594,7 +766,7 @@ export default function CompleteSettingsPage() {
             )}
 
             {/* Reviews Tab */}
-            {activeTab === 'reviews' && (
+            {activeTab === "reviews" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -603,13 +775,18 @@ export default function CompleteSettingsPage() {
                       <div className="flex items-center gap-2">
                         <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                         <span className="text-2xl font-bold">4.9</span>
-                        <span className="text-muted-foreground">(234 reviews)</span>
+                        <span className="text-muted-foreground">
+                          (234 reviews)
+                        </span>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {mockReviews.map((review) => (
-                      <div key={review.id} className="border-b last:border-0 pb-6 last:pb-0">
+                      <div
+                        key={review.id}
+                        className="border-b last:border-0 pb-6 last:pb-0"
+                      >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
@@ -617,16 +794,25 @@ export default function CompleteSettingsPage() {
                             </div>
                             <div>
                               <p className="font-semibold">{review.patient}</p>
-                              <p className="text-sm text-muted-foreground">{review.date}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {review.date}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
-                            {Array.from({ length: review.rating }).map((_, i) => (
-                              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            ))}
+                            {Array.from({ length: review.rating }).map(
+                              (_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                                />
+                              )
+                            )}
                           </div>
                         </div>
-                        <p className="text-muted-foreground">{review.comment}</p>
+                        <p className="text-muted-foreground">
+                          {review.comment}
+                        </p>
                       </div>
                     ))}
                   </CardContent>
@@ -635,32 +821,40 @@ export default function CompleteSettingsPage() {
             )}
 
             {/* Messages Tab */}
-            {activeTab === 'messages' && (
+            {activeTab === "messages" && (
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Messages</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground text-center py-8">No messages yet</p>
+                    <p className="text-muted-foreground text-center py-8">
+                      No messages yet
+                    </p>
                   </CardContent>
                 </Card>
               </div>
             )}
 
             {/* Settings Tab */}
-            {activeTab === 'settings' && (
+            {activeTab === "settings" && (
               <div className="space-y-6">
                 {/* Profile Image */}
                 <Card className="shadow-xl border-gray-200 bg-white">
                   <CardHeader>
-                    <CardTitle className="text-gray-900">Profile Image</CardTitle>
+                    <CardTitle className="text-gray-900">
+                      Profile Image
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col items-center gap-4">
                       <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-teal-100 bg-gray-100">
                         {imageUpload.preview ? (
-                          <img src={imageUpload.preview} alt="Profile" className="w-full h-full object-cover" />
+                          <img
+                            src={imageUpload.preview}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <svg
@@ -687,9 +881,17 @@ export default function CompleteSettingsPage() {
                       </div>
 
                       <div className="w-full max-w-xs">
-                        <label htmlFor="image-upload" className="cursor-pointer">
+                        <label
+                          htmlFor="image-upload"
+                          className="cursor-pointer"
+                        >
                           <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white rounded-lg hover:from-teal-600 hover:to-blue-600 transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -697,7 +899,11 @@ export default function CompleteSettingsPage() {
                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                               />
                             </svg>
-                            <span>{imageUpload.loading ? 'Uploading...' : 'Change Profile Image'}</span>
+                            <span>
+                              {imageUpload.loading
+                                ? "Uploading..."
+                                : "Change Profile Image"}
+                            </span>
                           </div>
                         </label>
                         <input
@@ -710,7 +916,11 @@ export default function CompleteSettingsPage() {
                         />
                       </div>
 
-                      {imageUpload.error && <p className="text-red-600 text-sm">{imageUpload.error}</p>}
+                      {imageUpload.error && (
+                        <p className="text-red-600 text-sm">
+                          {imageUpload.error}
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -718,7 +928,9 @@ export default function CompleteSettingsPage() {
                 {/* Personal Information */}
                 <Card className="shadow-xl border-gray-200 bg-white">
                   <CardHeader>
-                    <CardTitle className="text-gray-900">Personal Information</CardTitle>
+                    <CardTitle className="text-gray-900">
+                      Personal Information
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
@@ -727,7 +939,9 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="name"
                           value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -737,7 +951,9 @@ export default function CompleteSettingsPage() {
                           id="email"
                           type="email"
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -750,7 +966,9 @@ export default function CompleteSettingsPage() {
                           id="phone"
                           type="tel"
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -761,7 +979,9 @@ export default function CompleteSettingsPage() {
                       <Input
                         id="address"
                         value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
                         className="h-12"
                       />
                     </div>
@@ -771,7 +991,9 @@ export default function CompleteSettingsPage() {
                 {/* Professional Information */}
                 <Card className="shadow-xl border-gray-200 bg-white">
                   <CardHeader>
-                    <CardTitle className="text-gray-900">Professional Information</CardTitle>
+                    <CardTitle className="text-gray-900">
+                      Professional Information
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
@@ -780,7 +1002,12 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="specialty"
                           value={formData.specialty}
-                          onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              specialty: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -789,7 +1016,12 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="credentials"
                           value={formData.credentials}
-                          onChange={(e) => setFormData({ ...formData, credentials: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              credentials: e.target.value,
+                            })
+                          }
                           className="h-12"
                           placeholder="e.g., MD, PhD"
                         />
@@ -802,7 +1034,12 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="licenseId"
                           value={formData.licenseId}
-                          onChange={(e) => setFormData({ ...formData, licenseId: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              licenseId: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -811,7 +1048,12 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="npiNumber"
                           value={formData.npiNumber}
-                          onChange={(e) => setFormData({ ...formData, npiNumber: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              npiNumber: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -819,22 +1061,36 @@ export default function CompleteSettingsPage() {
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="yearsOfExperience">Years of Experience *</Label>
+                        <Label htmlFor="yearsOfExperience">
+                          Years of Experience *
+                        </Label>
                         <Input
                           id="yearsOfExperience"
                           type="number"
                           value={formData.yearsOfExperience}
-                          onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              yearsOfExperience: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="consultationFee">Consultation Fee ($) *</Label>
+                        <Label htmlFor="consultationFee">
+                          Consultation Fee ($) *
+                        </Label>
                         <Input
                           id="consultationFee"
                           type="number"
                           value={formData.consultationFee}
-                          onChange={(e) => setFormData({ ...formData, consultationFee: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              consultationFee: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -845,7 +1101,12 @@ export default function CompleteSettingsPage() {
                       <Textarea
                         id="qualifications"
                         value={formData.qualifications}
-                        onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            qualifications: e.target.value,
+                          })
+                        }
                         rows={3}
                         className="resize-none"
                       />
@@ -856,7 +1117,9 @@ export default function CompleteSettingsPage() {
                       <Textarea
                         id="bio"
                         value={formData.bio}
-                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, bio: e.target.value })
+                        }
                         rows={4}
                         className="resize-none"
                         placeholder="Tell patients about yourself..."
@@ -868,7 +1131,12 @@ export default function CompleteSettingsPage() {
                       <Textarea
                         id="servicesOffered"
                         value={formData.servicesOffered}
-                        onChange={(e) => setFormData({ ...formData, servicesOffered: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            servicesOffered: e.target.value,
+                          })
+                        }
                         rows={3}
                         className="resize-none"
                         placeholder="List your services..."
@@ -880,15 +1148,24 @@ export default function CompleteSettingsPage() {
                 {/* Location Information */}
                 <Card className="shadow-xl border-gray-200 bg-white">
                   <CardHeader>
-                    <CardTitle className="text-gray-900">Location Information</CardTitle>
+                    <CardTitle className="text-gray-900">
+                      Location Information
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="practiceAddress">Practice Address *</Label>
+                      <Label htmlFor="practiceAddress">
+                        Practice Address *
+                      </Label>
                       <Input
                         id="practiceAddress"
                         value={formData.practiceAddress}
-                        onChange={(e) => setFormData({ ...formData, practiceAddress: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            practiceAddress: e.target.value,
+                          })
+                        }
                         className="h-12"
                       />
                     </div>
@@ -899,7 +1176,9 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="city"
                           value={formData.city}
-                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, city: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -908,7 +1187,9 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="county"
                           value={formData.county}
-                          onChange={(e) => setFormData({ ...formData, county: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, county: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -920,7 +1201,9 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="state"
                           value={formData.state}
-                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, state: e.target.value })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -929,7 +1212,12 @@ export default function CompleteSettingsPage() {
                         <Input
                           id="zipCode"
                           value={formData.zipCode}
-                          onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              zipCode: e.target.value,
+                            })
+                          }
                           className="h-12"
                         />
                       </div>
@@ -943,7 +1231,9 @@ export default function CompleteSettingsPage() {
                     <CardTitle>Availability Settings</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground mb-4">Manage your availability and working hours</p>
+                    <p className="text-muted-foreground mb-4">
+                      Manage your availability and working hours
+                    </p>
                     <Button variant="outline">Manage Schedule</Button>
                   </CardContent>
                 </Card>
@@ -962,13 +1252,13 @@ export default function CompleteSettingsPage() {
                         Saving...
                       </>
                     ) : (
-                      'Save Changes'
+                      "Save Changes"
                     )}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => (window.location.href = '/')}
+                    onClick={() => (window.location.href = "/")}
                     className="h-12 px-8"
                   >
                     Cancel
