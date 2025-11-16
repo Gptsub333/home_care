@@ -24,7 +24,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import Appointments from './appointments/page';
+import Appointments from '@/components/ProviderAppointments';
+import ProviderBookings from '@/components/ProviderBookings';
 
 const mockTodayAppointments = [
   {
@@ -365,6 +366,14 @@ export default function CompleteSettingsPage() {
               <MessageCircle className="h-4 w-4 mr-2" />
               Messages
             </Button>
+             <Button
+              variant={activeTab === 'bookings' ? 'default' : 'ghost'}
+              className="w-full justify-start"
+              onClick={() => setActiveTab('bookings')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Bookings
+            </Button>
             <Button
               variant={activeTab === 'settings' ? 'default' : 'ghost'}
               className="w-full justify-start"
@@ -373,6 +382,7 @@ export default function CompleteSettingsPage() {
               <Settings className="h-4 w-4 mr-2" />
               Settings
             </Button>
+           
           </nav>
           <div className="mt-auto pt-6 border-t">
             <Button onClick={handleLogout} variant="ghost" className="w-full justify-start text-muted-foreground">
@@ -388,7 +398,7 @@ export default function CompleteSettingsPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-3xl font-serif font-bold mb-2">Doctor Dashboard</h1>
+                <h1 className="text-3xl font-serif font-bold mb-2">Provider Dashboard</h1>
                 <p className="text-muted-foreground">Welcome back, {formData.name}</p>
               </div>
               <Link href="/profile">
@@ -398,6 +408,7 @@ export default function CompleteSettingsPage() {
                 </Avatar> */}
               </Link>
             </div>
+
 
             {/* Overview Tab */}
             {activeTab === 'overview' && (
@@ -556,6 +567,9 @@ export default function CompleteSettingsPage() {
               //   </Card>
               // </div>
               <Appointments />
+            )}
+            {activeTab === 'bookings' && (
+              <ProviderBookings />
             )}
 
             {/* Earnings Tab */}

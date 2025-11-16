@@ -20,7 +20,7 @@ export function middleware(req) {
   // If logged in and trying to access auth pages
   if (token && isAuthPage) {
     if (role === "provider") {
-      url.pathname = "/dashboard/doctor";
+      url.pathname = "/dashboard/provider";
     } else {
       url.pathname = "/";
     }

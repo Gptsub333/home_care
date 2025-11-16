@@ -26,6 +26,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { format, addMinutes } from "date-fns"; // required for formatting date
 import { Clock } from "lucide-react";
+import { createBooking } from '@/lib/api/booking';
 
 
 // ... (keep all your icon components - StarIcon, MapPinIcon, etc.)
@@ -444,7 +445,7 @@ export default function ProviderProfilePage() {
     setEndTime(formattedEnd);
   }, [selectedTime]);
 
-  const handleBooking = async () => {
+  const handleBookingapp = async () => {
     if (!selectedService || !date || !selectedTime) {
       alert("Please select service, date, and time before booking.");
       return;
@@ -497,6 +498,56 @@ export default function ProviderProfilePage() {
   };
 
   // Helper: convert "10:00 AM" → "10:00"
+ 
+  const handleBooking = async () => {
+    handleBookingapp();
+  if (!selectedService || !date || !selectedTime) {
+    alert('Please select service, date, and time before booking.');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    // Get user location
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Create booking with geolocation
+        const result = await createBooking({
+          providerId: provider.providerId,
+          serviceType: selectedService,
+          description: notes || selectedService,
+          scheduledDate: format(date, 'yyyy-MM-dd'),
+          scheduledTime: selectedTime,
+          address: provider.practiceAddress || 'Home Service',
+          latitude: latitude,
+          longitude: longitude,
+          locationNotes: notes,
+          estimatedPrice: provider.consultationFee || 0
+        });
+
+        alert(result.message);
+        setSelectedService('');
+        setSelectedTime('');
+        setDate(null);
+        setNotes('');
+        setIsBookingOpen(false);
+      },
+      (error) => {
+        console.error('Location error:', error);
+        alert('Please enable location services to book');
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    alert(error.message || 'Booking failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+ 
   const convertTo24Hour = (time12h) => {
     const [time, modifier] = time12h.split(" ");
     let [hours, minutes] = time.split(":");

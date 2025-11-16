@@ -39,7 +39,7 @@ export default function ProviderLoginPage() {
       localStorage.setItem('role', 'doctor');
       localStorage.setItem('user', JSON.stringify(data.user));
       document.cookie = `token=${data.token}; path=/;`;
-      router.push('/dashboard/doctor');
+      router.push('/dashboard/provider');
     } catch (error) {
       console.error('Login error:', error);
       alert('Something went wrong');

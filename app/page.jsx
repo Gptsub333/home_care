@@ -223,7 +223,7 @@ export default function HomePage() {
                 <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg p-2 animate-fade-in z-50">
                   {role === 'doctor' ? (
                     <Link
-                      href="/dashboard/doctor"
+                      href="/dashboard/provider"
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-primary/10 hover:text-primary transition-all"
                     >
                       <svg

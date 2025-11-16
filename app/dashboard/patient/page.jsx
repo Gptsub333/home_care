@@ -537,7 +537,7 @@ export default function PatientDashboard() {
                       />
                     </div>
 
-                    <div>
+                    {/* <div>
                       <label className="text-sm font-medium mb-2 block">
                         Email
                       </label>
@@ -547,9 +547,9 @@ export default function PatientDashboard() {
                         disabled // email usually not editable
                         className="w-full px-3 py-2 border rounded-md"
                       />
-                    </div>
+                    </div> */}
 
-                    <div>
+                    {/* <div>
                       <label className="text-sm font-medium mb-2 block">
                         Phone
                       </label>
@@ -559,7 +559,7 @@ export default function PatientDashboard() {
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md"
                       />
-                    </div>
+                    </div> */}
 
                     <div>
                       <label className="text-sm font-medium mb-2 block">
