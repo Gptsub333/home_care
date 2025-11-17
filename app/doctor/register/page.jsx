@@ -741,6 +741,15 @@ export default function DoctorRegisterPage() {
                     Back
                   </Button>
                 )}
+                {isLoading ? (
+                  <Button
+                    type="button"
+                    className={`flex-1 h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white cursor-not-allowed opacity-70`}
+                    disabled
+                  >
+                    Processing...
+                  </Button>
+                ) : (
                 <Button
                   type="submit"
                   className={`h-12 bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600 ${
@@ -749,6 +758,7 @@ export default function DoctorRegisterPage() {
                 >
                   {step < 3 ? 'Continue' : 'Submit Application'}
                 </Button>
+)}
               </div>
             </form>
 

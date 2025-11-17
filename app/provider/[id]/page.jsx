@@ -515,40 +515,73 @@ export default function ProviderProfilePage() {
   // Add this function to your existing ProviderProfilePage component
   // Place it before the return statement
 
+  // const handleSendMessage = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       alert("Please login to send messages");
+  //       window.location.href = "/login";
+  //       return;
+  //     }
+
+  //     // Create or get chat room
+  //     const response = await fetch(`${BACKEND_URL}/messages/room`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     body: JSON.stringify({ providerUserId: provider.userId })
+
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to create chat room");
+  //     }
+
+  //     const data = await response.json();
+
+  //     // Redirect to chat page with room ID
+  //     window.location.href = `/messages/${data.room.id}`;
+  //   } catch (error) {
+  //     console.error("Error creating chat:", error);
+  //     alert("Failed to start chat. Please try again.");
+  //   }
+  // };
   const handleSendMessage = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please login to send messages");
-        window.location.href = "/login";
-        return;
-      }
-
-      // Create or get chat room
-      const response = await fetch(`${BACKEND_URL}/messages/room`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          providerId: provider.providerId, // This is the provider ID from your API
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create chat room");
-      }
-
-      const data = await response.json();
-
-      // Redirect to chat page with room ID
-      window.location.href = `/messages/${data.room.id}`;
-    } catch (error) {
-      console.error("Error creating chat:", error);
-      alert("Failed to start chat. Please try again.");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to send messages");
+      window.location.href = "/login";
+      return;
     }
-  };
+
+    const response = await fetch(`${BACKEND_URL}/messages/room`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+  providerUserId: provider.userId
+})
+
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Failed to create chat room");
+    }
+
+    const data = await response.json();
+    window.location.href = `/messages/${data.room.id}`;
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    alert(error.message || "Failed to start chat.");
+  }
+};
+
 
   // Update the "Send Message" button in your return JSX:
   // Replace this line:
