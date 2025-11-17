@@ -148,35 +148,13 @@ const ChevronLeftIcon = ({ className }) => (
   </svg>
 );
 
-const mockProvider = {
-  id: 1,
-  name: "Dr. Sarah Johnson",
-  price: 150,
-  services: [
-    { name: "General Consultation", price: 150, duration: "30 min" },
-    { name: "Comprehensive Physical", price: 250, duration: "60 min" },
-    { name: "Follow-up Visit", price: 100, duration: "20 min" },
-    { name: "Urgent Care", price: 200, duration: "45 min" },
-  ],
-};
 
-const timeSlots = [
-  "9:00 AM",
-  "10:00 AM",
-  "11:00 AM",
-  "2:00 PM",
-  "3:00 PM",
-  "4:00 PM",
-];
+
+
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api";
 
-const services = [
-  { name: "General Consultation", price: 150, duration: "30 min" },
-  { name: "Comprehensive Physical", price: 250, duration: "60 min" },
-  { name: "Follow-up Visit", price: 100, duration: "20 min" },
-  { name: "Urgent Care", price: 200, duration: "45 min" },
-];
+
 
 export default function ProviderProfilePage() {
   const { id } = useParams();
@@ -191,6 +169,7 @@ export default function ProviderProfilePage() {
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [services, setServices] = useState([]);
 
   // Booking state
   const [date, setDate] = useState(new Date());
@@ -221,6 +200,7 @@ export default function ProviderProfilePage() {
   const [reviewsPagination, setReviewsPagination] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+
   // Fetch provider details
   const fetchProvider = async () => {
     setLoading(true);
@@ -242,6 +222,8 @@ export default function ProviderProfilePage() {
       const data = await res.json();
       console.log(data);
       setProvider(data);
+     setServices(data?.servicesOffered?.split(",").map(s => s.trim()).filter(Boolean) || []);
+
     } catch (err) {
       setError("Failed to load provider details");
       console.error(err);
@@ -373,6 +355,7 @@ export default function ProviderProfilePage() {
         setLoading(false);
         const data = await res.json();
         setProvider(data);
+        
       } catch (err) {
         setError("Failed to load provider details");
         console.error(err);
@@ -467,6 +450,7 @@ export default function ProviderProfilePage() {
           duration: 30,
           price: provider?.consultationFee || 0,
           patientNotes: notes || "",
+         
         }),
       });
 
@@ -476,7 +460,7 @@ export default function ProviderProfilePage() {
       if (!res.ok || data.error) {
         throw new Error(data.error || "Failed to book appointment");
       }
-
+    console.log("Booking Response:", provider);
       // ✅ On success
       setSuccessMessage(data.message || "Appointment booked successfully!");
       alert(data.message || "Appointment booked successfully!");
@@ -495,6 +479,7 @@ export default function ProviderProfilePage() {
       setLoading(false);
     }
   };
+  
 
   // Helper: convert "10:00 AM" → "10:00"
   const convertTo24Hour = (time12h) => {
@@ -564,7 +549,7 @@ export default function ProviderProfilePage() {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-  providerUserId: provider.userId
+       providerUserId: provider.userId 
 })
 
     });
@@ -579,10 +564,11 @@ export default function ProviderProfilePage() {
   } catch (error) {
     console.error("Error creating chat:", error);
     alert(error.message || "Failed to start chat.");
+  
   }
 };
 
-
+ // handles empty items
   // Update the "Send Message" button in your return JSX:
   // Replace this line:
   // <Link href={`/messages/${mockProvider.id}`} className="block">
@@ -985,24 +971,22 @@ export default function ProviderProfilePage() {
                         <label className="text-sm font-medium mb-2 block">
                           Select Service
                         </label>
-                        <Select
-                          value={selectedService}
-                          onValueChange={setSelectedService}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose a service" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {services.map((service) => (
-                              <SelectItem
-                                key={service.name}
-                                value={service.name}
-                              >
-                                {service.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <Select
+        value={selectedService}
+        onValueChange={setSelectedService}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Choose a service" />
+        </SelectTrigger>
+
+        <SelectContent>
+          {services.map((service) => (
+            <SelectItem key={service} value={service}>
+              {service}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
                       </div>
 
                       {/* Date Selection */}
