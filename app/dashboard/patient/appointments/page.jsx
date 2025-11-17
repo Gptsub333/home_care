@@ -19,7 +19,7 @@ export default function ProviderAppointments({ role = "provider" }) {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `${BACKEND_URL}/appointments/provider/appointments`,
+        `${BACKEND_URL}/appointments/my-appointments`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
