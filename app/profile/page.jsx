@@ -23,7 +23,7 @@ export default function ProfileDetailPage() {
         window.location.href = '/login';
         return;
       }
-
+    //  console.log('Stored User Data:', storedUser, userData?.user?.profileImage); // Debugging line
       const parsedUser = JSON.parse(storedUser);
       setUserData(parsedUser);
       setLoading(false);
@@ -105,7 +105,7 @@ export default function ProfileDetailPage() {
               {/* Profile Image */}
               <div className="relative">
                 <img
-                  src={userData?.provider?.profileImage || 'https://via.placeholder.com/150'}
+                  src={userData?.profileImage ||  'https://via.placeholder.com/150'}
                   alt={userData?.name}
                   className="w-32 h-32 rounded-full object-cover border-4 border-teal-100"
                 />

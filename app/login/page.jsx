@@ -9,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label"
 import { toast } from 'sonner';
 
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://home-care-backend.onrender.com/api";
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -21,7 +24,7 @@ export default function LoginPage() {
     e.preventDefault();
   setIsLoading(true);
     try {
-      const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
+      const res = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

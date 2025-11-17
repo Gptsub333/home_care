@@ -213,7 +213,7 @@ export default function HomePage() {
             <div className="relative">
               <button onClick={() => setShowDropdown(!showDropdown)} className="focus:outline-none">
                 <img
-                  src={user?.provider?.profileImage}
+                  src={user?.profileImage || '/placeholder-profile.png'}
                   alt="User Profile"
                   className="w-10 h-10 rounded-full border-2 border-primary/30 hover:border-primary transition-all duration-300"
                 />
