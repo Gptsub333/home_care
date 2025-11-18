@@ -214,7 +214,7 @@ export default function CompleteSettingsPage() {
     const fetchAppointments = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`${BACKEND_URL}/appointments/my-appointments`, {
+        const res = await fetch(`${BACKEND_URL}/appointments/provider/appointments`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
