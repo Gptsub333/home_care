@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function ProviderLoginPage() {
   const router = useRouter()
@@ -16,37 +17,69 @@ export default function ProviderLoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    userType: "PROVIDER"
   })
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const res = await fetch('https://home-care-backend.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        credentials: 'include', // ✅ required for cookies
-      });
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await fetch(`${BACKEND_URL}/auth/login`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(formData),
+  //       credentials: 'include', // ✅ required for cookies
+  //     });
 
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || 'Login failed');
-        return;
-      }
+  //     const data = await res.json();
+  //     if (!res.ok) {
+  //       alert(data.message || 'Login failed');
+  //       return;
+  //     }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('role', 'doctor');
-      localStorage.setItem('user', JSON.stringify(data.user));
-      document.cookie = `token=${data.token}; path=/;`;
-      router.push('/dashboard/doctor');
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Something went wrong');
-    }finally {
-      setIsLoading(false);
+  //     localStorage.setItem('token', data.token);
+  //     localStorage.setItem('role', 'doctor');
+  //     localStorage.setItem('user', JSON.stringify(data.user));
+  //     document.cookie = `token=${data.token}; path=/;`;
+  //     router.push('/dashboard/doctor');
+  //   } catch (error) {
+  //     console.error('Login error:', error);
+  //     alert('Something went wrong');
+  //   }finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  try {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || 'Login failed');
+      return;
     }
-  };
+
+    // ✅ Changed from data.user to data.provider
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('role', 'PROVIDER');
+    localStorage.setItem('user', JSON.stringify(data.provider)); // Changed here
+    document.cookie = `token=${data.token}; path=/;`;
+    router.push('/dashboard/doctor');
+  } catch (error) {
+    console.error('Login error:', error);
+    alert('Something went wrong');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">

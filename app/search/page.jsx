@@ -50,6 +50,7 @@ const allServices = [
   "Dental Checkup",
   "Therapy sessions",
 ];
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,7 +88,7 @@ export default function SearchPage() {
       }).toString();
 
       const res = await fetch(
-        `https://home-care-backend.onrender.com/api/providers/search?${query}`
+        `${BACKEND_URL}/providers/search?${query}`
       );
       const data = await res.json();
 
@@ -418,7 +419,7 @@ export default function SearchPage() {
           {/* Providers Grid */}
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredProviders.map((provider) => (
-              <Link key={provider.userId} href={`/provider/${provider.userId}`}>
+              <Link key={provider.providerId} href={`/provider/${provider.providerId}`}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4 mb-4">

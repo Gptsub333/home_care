@@ -93,26 +93,46 @@ export default function HomePage() {
     if (location) params.set("location", location);
     window.location.href = `/search?${params.toString()}`;
   };
-  const handleLogout = async () => {
-    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
-    //   method: 'POST',
-    //   credentials: 'include',
-    // });
+//   const handleLogout = async () => {
+//     await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
+//       method: 'POST',
+//       credentials: 'include',
+//     });
 
-    // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token'); // if you store token separately
-    localStorage.removeItem('role');
+//     // Clear localStorage
+//     localStorage.removeItem('user');
+//     localStorage.removeItem('token'); // if you store token separately
+//     localStorage.removeItem('role');
 
-    // Clear cookie
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    
+    
+// // Clear all cookies by setting them to empty
+// document.cookie.split(";").forEach((cookie) => {
+//   const name = cookie.split("=")[0].trim();
+//   document.cookie = `${name}=; max-age=0; path=/;`;
+// });
 
-    // Redirect to login
-    if (role === 'doctor') {
-      window.location.href = '/doctor/login';
-    } else {
-      window.location.href = '/login';
-    }
+
+
+//     // Redirect to login
+//     if (role === 'doctor') {
+//       window.location.href = '/doctor/login';
+//     } else {
+//       window.location.href = '/login';
+//     }
+//   };
+    const handleLogout = async () => {
+    await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+   
+    // Clear all cookies by setting them to empty
+document.cookie.split(";").forEach((cookie) => {
+  const name = cookie.split("=")[0].trim();
+  document.cookie = `${name}=; max-age=0; path=/;`;
+});
+ router.push("/login");
   };
 
   React.useEffect(() => {

@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label"
 import { toast } from 'sonner';
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://home-care-backend.onrender.com/api";
+  process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    userType: 'USER'
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,37 +51,43 @@ export default function LoginPage() {
     }
   };
 
-  // const handleLogout = async () => {
-  //   await fetch("http://localhost:5000/api/auth/logout", {
-  //     method: "POST",
-  //     credentials: "include",
-  //   });
-  //   router.push("/login");
-  // };
-
   const handleLogout = async () => {
-    // await fetch(`${NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
-    //   method: 'POST',
-    //   credentials: 'include',
-    // });
-
-    const role = localStorage.getItem('role');
-
-    // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('token'); // if you store token separately
-    localStorage.removeItem('role');
-
-    // Clear cookie
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-
-    // Redirect to login
-    if (role === 'doctor') {
-      window.location.href = '/doctor/login';
-    } else {
-      window.location.href = '/login';
-    }
+    await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+   
+    // Clear all cookies by setting them to empty
+document.cookie.split(";").forEach((cookie) => {
+  const name = cookie.split("=")[0].trim();
+  document.cookie = `${name}=; max-age=0; path=/;`;
+});
+ router.push("/login");
   };
+
+  // const handleLogout = async () => {
+  //   await fetch(`${BACKEND_URL}/auth/logout`, {
+  //     method: 'POST',
+  //     credentials: 'include',
+  //   });
+
+  //   const role = localStorage.getItem('role');
+
+  //   // Clear localStorage
+  //   localStorage.removeItem('user');
+  //   localStorage.removeItem('token'); // if you store token separately
+  //   localStorage.removeItem('role');
+
+  //   // Clear cookie
+  //   document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+  //   // Redirect to login
+  //   if (role === 'doctor') {
+  //     window.location.href = '/doctor/login';
+  //   } else {
+  //     window.location.href = '/login';
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 flex items-center justify-center p-4">
