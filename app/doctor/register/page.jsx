@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export default function DoctorRegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -117,38 +119,79 @@ export default function DoctorRegisterPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    if (step < 3) {
-      if (step === 1 && !formData.profileImage) {
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+    
+  //   if (step < 3) {
+  //     if (step === 1 && !formData.profileImage) {
+  //       setImageUpload((prev) => ({
+  //         ...prev,
+  //         error: 'Please upload a profile image before proceeding',
+  //       }));
+  //       return;
+  //     }
+  //     setStep(step + 1);
+  //   } else {
+  //     try {
+  //       if (!formData.profileImage || !formData.profileImageKey) {
+  //         setImageUpload((prev) => ({
+  //           ...prev,
+  //           error: 'Please select and upload an image before submitting',
+  //         }));
+  //         return;
+  //       }
+  //       setIsLoading(true);
+  //       const res = await axios.post(`${BACKEND_URL}/auth/register/provider`, formData);
+  //       if (res.status === 201) {
+  //         router.push('/doctor/login');
+  //       }
+  //     } catch (error) {
+  //       toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+  //     }finally {  
+  //       setIsLoading(false);
+  //     }
+  //   }
+  // };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (step < 3) {
+    if (step === 1 && !formData.profileImage) {
+      setImageUpload((prev) => ({
+        ...prev,
+        error: 'Please upload a profile image before proceeding',
+      }));
+      return;
+    }
+    setStep(step + 1);
+  } else {
+    try {
+      if (!formData.profileImage || !formData.profileImageKey) {
         setImageUpload((prev) => ({
           ...prev,
-          error: 'Please upload a profile image before proceeding',
+          error: 'Please select and upload an image before submitting',
         }));
         return;
       }
-      setStep(step + 1);
-    } else {
-      try {
-        if (!formData.profileImage || !formData.profileImageKey) {
-          setImageUpload((prev) => ({
-            ...prev,
-            error: 'Please select and upload an image before submitting',
-          }));
-          return;
-        }
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/register/provider`, formData);
-        if (res.status === 201) {
-          router.push('/doctor/login');
-        }
-      } catch (error) {
-        toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
-      }finally {  
-        setIsLoading(false);
-      }
+      setIsLoading(true);
+      const res = await axios.post(`${BACKEND_URL}/auth/register/provider`, formData);
+      
+   if (res.status === 201) {
+  localStorage.setItem('token', res.data.token);
+  localStorage.setItem('role', 'doctor');
+  localStorage.setItem('user', JSON.stringify(res.data.provider)); // Changed from data.user
+  document.cookie = `token=${res.data.token}; path=/;`;
+  toast.success('Registration successful!');
+  router.push('/dashboard/doctor');
+}
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {  
+      setIsLoading(false);
     }
-  };
+  }
+};
 
   const handleBack = () => {
     if (step > 1) {
