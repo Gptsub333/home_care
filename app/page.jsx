@@ -122,7 +122,7 @@ export default function HomePage() {
 //     }
 //   };
     const handleLogout = async () => {
-    await fetch("http://localhost:5000/api/auth/logout", {
+    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
