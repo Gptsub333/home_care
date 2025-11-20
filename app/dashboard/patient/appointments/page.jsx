@@ -424,6 +424,16 @@ const past = appointments.filter((a) => {
     }
   };
 
+  const getProviderName = (apt) => {
+    return (
+      apt?.provider?.user?.name ||
+      apt?.provider?.name ||
+      apt?.providerName ||
+      apt?.provider ||
+      "Provider"
+    );
+  };
+
   const renderAppointmentRow = (apt) => (
     <div
       key={apt.id}
@@ -432,7 +442,7 @@ const past = appointments.filter((a) => {
       {/* Left - Appointment Info */}
       <div className="flex-1 w-full space-y-2">
         <h3 className="text-lg font-semibold text-gray-800">
-          {apt.provider?.user?.name || "Provider"}
+          {getProviderName(apt)}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-2 text-sm text-gray-600">
