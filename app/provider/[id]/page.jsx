@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,14 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { format, addMinutes } from "date-fns";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Home, Navigation } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
+
 
 // Icon components
 const StarIcon = ({ className, filled }) => (
@@ -83,15 +87,11 @@ const ChevronLeftIcon = ({ className }) => (
   </svg>
 );
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://home-care-backend.onrender.com/api";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ;
 
 export default function ProviderProfilePage() {
   const { id } = useParams();
 
-  // ============================================
-  // ALL HOOKS MUST BE AT THE TOP - NO CONDITIONS
-  // ============================================
-  
   // Token state
   const [token, setToken] = useState(null);
 
@@ -109,6 +109,10 @@ export default function ProviderProfilePage() {
   });
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [serviceAddress, setServiceAddress] = useState("");
+  
+  // NEW: Address detail fields
+  const [apartmentStreet, setApartmentStreet] = useState("");
+  const [landmark, setLandmark] = useState("");
 
   // Booking state
   const [date, setDate] = useState(new Date());
@@ -134,10 +138,6 @@ export default function ProviderProfilePage() {
   const libraries = ['places'];
   const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // ============================================
-  // ALL useEffect HOOKS
-  // ============================================
-
   // Load token from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -152,6 +152,8 @@ export default function ProviderProfilePage() {
       const savedAddress = localStorage.getItem('userLastAddress');
       const savedLat = localStorage.getItem('userLastLat');
       const savedLng = localStorage.getItem('userLastLng');
+      const savedApartment = localStorage.getItem('userLastApartment');
+      const savedLandmark = localStorage.getItem('userLastLandmark');
       
       if (savedAddress && savedLat && savedLng) {
         setLocationData({
@@ -161,6 +163,9 @@ export default function ProviderProfilePage() {
         });
         setServiceAddress(savedAddress);
       }
+      
+      if (savedApartment) setApartmentStreet(savedApartment);
+      if (savedLandmark) setLandmark(savedLandmark);
     }
   }, []);
 
@@ -214,10 +219,6 @@ export default function ProviderProfilePage() {
     const formattedEnd = format(end, "hh:mm a");
     setEndTime(formattedEnd);
   }, [selectedTime]);
-
-  // ============================================
-  // REGULAR FUNCTIONS (NOT HOOKS)
-  // ============================================
 
   const fetchProvider = async () => {
     setLoading(true);
@@ -296,7 +297,6 @@ export default function ProviderProfilePage() {
 
     const cookieToken = localStorage.getItem("token") || getCookie("token");
 
-
     if (!cookieToken) {
       alert("You must be logged in to submit a review. Please login first.");
       setIsSubmitting(false);
@@ -354,8 +354,27 @@ export default function ProviderProfilePage() {
       return;
     }
 
+    if (!apartmentStreet.trim()) {
+      alert("Please enter your apartment/room and street details.");
+      return;
+    }
+
     try {
       setLoading(true);
+      
+      // Build complete address with all details
+      let completeAddress = apartmentStreet.trim();
+      completeAddress += `, ${locationData.address}`;
+      if (landmark.trim()) {
+        completeAddress += ` (Near ${landmark.trim()})`;
+      }
+      
+      // Save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem('userLastApartment', apartmentStreet);
+        localStorage.setItem('userLastLandmark', landmark);
+      }
+      
       const res = await fetch(`${BACKEND_URL}/appointments`, {
         method: "POST",
         headers: {
@@ -371,7 +390,7 @@ export default function ProviderProfilePage() {
           duration: 30,
           price: provider?.consultationFee || 0,
           patientNotes: notes || "",
-          serviceAddress: locationData.address,
+          serviceAddress: completeAddress,
           serviceLat: locationData.lat,
           serviceLng: locationData.lng,
         }),
@@ -391,6 +410,8 @@ export default function ProviderProfilePage() {
       setSelectedTime("");
       setDate(new Date());
       setNotes("");
+      setApartmentStreet("");
+      setLandmark("");
       setIsBookingOpen(false);
       setShowLocationPicker(false);
     } catch (error) {
@@ -408,7 +429,6 @@ export default function ProviderProfilePage() {
         window.location.href = "/login";
         return;
       }
-      console.log("Starting chat with provider:", provider);
 
       const response = await fetch(`${BACKEND_URL}/messages/room`, {
         method: "POST",
@@ -445,10 +465,6 @@ export default function ProviderProfilePage() {
 
   const selectedServiceDetails = services.find((s) => s.name === selectedService);
 
-  // ============================================
-  // EARLY RETURNS (AFTER ALL HOOKS)
-  // ============================================
-
   if (loading && !provider) {
     return <div className="p-10 text-center text-lg">Loading provider...</div>;
   }
@@ -460,12 +476,6 @@ export default function ProviderProfilePage() {
   if (!provider) {
     return <div className="p-10 text-center">No provider found</div>;
   }
-
-  // ============================================
-  // MAIN RENDER
-  // ============================================
-
-  console.log("Provider data:", googleMapsApiKey);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-cyan-50">
@@ -795,7 +805,7 @@ export default function ProviderProfilePage() {
             <Card className="sticky top-24 border-teal-100 shadow-lg">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
-                  <h2>Book Appointment</h2>
+                  <h2 className="text-xl font-semibold mb-2">Book Appointment</h2>
                   <p className="text-sm text-muted-foreground mb-2">Starting from</p>
                   <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent mb-1">
                     ${provider.consultationFee}
@@ -803,228 +813,283 @@ export default function ProviderProfilePage() {
                   <p className="text-sm text-muted-foreground">per visit</p>
                 </div>
 
-              <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
-  <DialogTrigger asChild>
-    <Button
-      className="w-full mb-3 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
-      size="lg"
-    >
-      <CalendarIcon className="h-5 w-5 mr-2" />
-      Book Appointment
-    </Button>
-  </DialogTrigger>
+                <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="w-full mb-3 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
+                      size="lg"
+                    >
+                      <CalendarIcon className="h-5 w-5 mr-2" />
+                      Book Appointment
+                    </Button>
+                  </DialogTrigger>
 
-  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle className="text-2xl">Book Appointment</DialogTitle>
-      <DialogDescription>
-        Schedule your visit with {provider.name}
-      </DialogDescription>
-    </DialogHeader>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl">Book Appointment</DialogTitle>
+                      <DialogDescription>
+                        Schedule your visit with {provider.name}
+                      </DialogDescription>
+                    </DialogHeader>
 
-    {/* Wrap everything with LoadScript - ONLY ONCE */}
-    <LoadScript
-      googleMapsApiKey={googleMapsApiKey}
-      libraries={libraries}
-      onLoad={() => setIsMapLoaded(true)}
-    >
-      <div className="space-y-6 py-4">
-        {/* Location Picker */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium block">
-              Service Location *
-            </label>
-            {locationData.address && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowLocationPicker(!showLocationPicker)}
-                className="text-teal-600 hover:text-teal-700"
-              >
-                {showLocationPicker ? "Hide Map" : "Change Location"}
-              </Button>
-            )}
-          </div>
-
-          {locationData.address && !showLocationPicker && (
-            <div
-              onClick={() => setShowLocationPicker(true)}
-              className="bg-teal-50 border-2 border-teal-200 rounded-lg p-4 cursor-pointer hover:bg-teal-100 transition-colors"
-            >
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-teal-900 mb-1">
-                    Selected Location
-                  </p>
-                  <p className="text-sm text-teal-700">{locationData.address}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {(!locationData.address || showLocationPicker) && (
-            <div className="border-2 border-teal-200 rounded-lg p-4 bg-white">
-              <LocationPicker
-                onLocationSelect={handleLocationSelect}
-                initialLocation={
-                  locationData.lat && locationData.lng
-                    ? { lat: locationData.lat, lng: locationData.lng }
-                    : null
-                }
-                isLoaded={isMapLoaded}
-              />
-            </div>
-          )}
-
-          <p className="text-xs text-muted-foreground mt-2">
-            📍 Select where you want the provider to come
-          </p>
-        </div>
-
-        {/* Rest of your form fields */}
-        {/* Service Selection */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">
-            Select Service *
-          </label>
-          <Select value={selectedService} onValueChange={setSelectedService}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a service" />
-            </SelectTrigger>
-            <SelectContent>
-              {services.map((service) => (
-                <SelectItem key={service} value={service}>
-                  {service}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-          {/* Date Selection */}
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          Select Date
-                        </label>
-                        <CalendarComponent
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          className="rounded-md border"
-                          disabled={(date) => date < new Date()}
-                        />
-                      </div>
-
-                      {/* Time Selection */}
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          Select Time
-                        </label>
-
-                        {timeSlots.length > 0 ? (
-                          <div className="grid grid-cols-3 gap-2">
-                            {timeSlots.map((time) => (
+                    <LoadScript
+                      googleMapsApiKey={googleMapsApiKey}
+                      libraries={libraries}
+                      onLoad={() => setIsMapLoaded(true)}
+                    >
+                      <div className="space-y-6 py-4">
+                        {/* Location Picker Section */}
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-teal-600" />
+                              Service Location *
+                            </label>
+                            {locationData.address && (
                               <Button
-                                key={time}
-                                variant={
-                                  selectedTime === time ? "default" : "outline"
-                                }
-                                onClick={() => setSelectedTime(time)}
-                                className={
-                                  selectedTime === time
-                                    ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer text-white"
-                                    : "cursor-pointer"
-                                }
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowLocationPicker(!showLocationPicker)}
+                                className="text-teal-600 hover:text-teal-700"
                               >
-                                {time}
+                                {showLocationPicker ? "Hide Map" : "Change Location"}
                               </Button>
-                            ))}
+                            )}
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-xl py-6 bg-gray-50 text-gray-500 text-sm">
-                            <Clock className="h-5 w-5 text-gray-400 mb-2" />
-                            <span>No time slots available on this date</span>
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Notes */}
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          Additional Notes (Optional)
-                        </label>
-                        <Textarea
-                          placeholder="Any specific concerns or requirements..."
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          rows={3}
-                        />
-                      </div>
+                          {locationData.address && !showLocationPicker && (
+                            <div
+                              onClick={() => setShowLocationPicker(true)}
+                              className="bg-gradient-to-br from-teal-50 to-blue-50 border-2 border-teal-200 rounded-lg p-4 cursor-pointer hover:border-teal-300 transition-all"
+                            >
+                              <div className="flex items-start gap-3">
+                                <MapPin className="h-5 w-5 text-teal-600 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-teal-900 mb-1">
+                                    Selected Location
+                                  </p>
+                                  <p className="text-sm text-teal-700">{locationData.address}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
-                      {/* Summary */}
-                      {selectedService && selectedTime && (
-                        <div className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg space-y-2 border border-teal-100">
-                          <h4 className="font-semibold mb-2">
-                            Booking Summary
+                          {(!locationData.address || showLocationPicker) && (
+                            <div className="border-2 border-teal-200 rounded-lg p-4 bg-white">
+                              <LocationPicker
+                                onLocationSelect={handleLocationSelect}
+                                initialLocation={
+                                  locationData.lat && locationData.lng
+                                    ? { lat: locationData.lat, lng: locationData.lng }
+                                    : null
+                                }
+                                isLoaded={isMapLoaded}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Address Details Section */}
+                        <div className="bg-gradient-to-br from-blue-50 to-teal-50 border-2 border-teal-100 rounded-lg p-4 space-y-4">
+                          <h4 className="font-semibold text-teal-900 flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            Complete Your Address
                           </h4>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Service:
-                            </span>
-                            <span className="font-medium">
-                              {selectedService}
-                            </span>
+                          
+                          {/* Apartment/Street Field - Required */}
+                          <div>
+                            <label className="text-sm font-medium mb-2 block text-teal-900">
+                              Apartment/Room & Street *
+                            </label>
+                            <Input
+                              placeholder="e.g., Flat 304, Green Valley Apartments, MG Road"
+                              value={apartmentStreet}
+                              onChange={(e) => setApartmentStreet(e.target.value)}
+                              className="border-teal-200 focus:border-teal-400 focus:ring-teal-400"
+                              required
+                            />
+                            <p className="text-xs text-muted-foreground mt-1.5">
+                              Enter your full building and street address
+                            </p>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Date:</span>
-                            <span className="font-medium">
-                              {date?.toLocaleDateString()}
-                            </span>
+
+                          {/* Landmark Field - Optional */}
+                          <div>
+                            <label className="text-sm font-medium mb-2 block text-teal-900 flex items-center gap-1">
+                              <Navigation className="h-3.5 w-3.5" />
+                              Landmark (Optional)
+                            </label>
+                            <Input
+                              placeholder="e.g., Near City Mall, Behind SBI Bank"
+                              value={landmark}
+                              onChange={(e) => setLandmark(e.target.value)}
+                              className="border-teal-200 focus:border-teal-400 focus:ring-teal-400"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1.5">
+                              Help the provider find you easily
+                            </p>
                           </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Time:</span>
-                            <span className="font-medium">{selectedTime}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Duration:
-                            </span>
-                            <span className="font-medium">
-                              {selectedServiceDetails?.duration}
-                            </span>
-                          </div>
-                          <div className="border-t border-teal-200 pt-2 mt-2">
-                            <div className="flex justify-between">
-                              <span className="font-semibold">Total:</span>
-                              <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
-                                ${selectedServiceDetails?.price}
+
+                          {/* Address Preview */}
+                          {/* {(apartmentStreet || locationData.address) && (
+                            <div className="bg-white border border-teal-200 rounded-md p-3 mt-3">
+                              <p className="text-xs font-medium text-teal-700 mb-1">
+                                Complete Address Preview:
+                              </p>
+                              <p className="text-sm text-gray-700">
+                                {apartmentStreet && <span className="font-medium">{apartmentStreet}</span>}
+                                {apartmentStreet && locationData.address && ", "}
+                                {locationData.address}
+                                {landmark && <span className="text-teal-600"> (Near {landmark})</span>}
+                              </p>
+                            </div>
+                          )} */}
+                        </div>
+
+                        {/* Service Selection */}
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">
+                            Select Service *
+                          </label>
+                          <Select value={selectedService} onValueChange={setSelectedService}>
+                            <SelectTrigger className="border-teal-200 focus:border-teal-400">
+                              <SelectValue placeholder="Choose a service" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {services.map((service) => (
+                                <SelectItem key={service} value={service}>
+                                  {service}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Date Selection */}
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">
+                            Select Date *
+                          </label>
+                          <CalendarComponent
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            className="rounded-md border border-teal-200"
+                            disabled={(date) => date < new Date()}
+                          />
+                        </div>
+
+                        {/* Time Selection */}
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">
+                            Select Time *
+                          </label>
+
+                          {timeSlots.length > 0 ? (
+                            <div className="grid grid-cols-3 gap-2">
+                              {timeSlots.map((time) => (
+                                <Button
+                                  key={time}
+                                  variant={selectedTime === time ? "default" : "outline"}
+                                  onClick={() => setSelectedTime(time)}
+                                  className={
+                                    selectedTime === time
+                                      ? "bg-gradient-to-r from-teal-500 to-blue-500 cursor-pointer text-white"
+                                      : "cursor-pointer border-teal-200 hover:border-teal-400"
+                                  }
+                                >
+                                  {time}
+                                </Button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-xl py-6 bg-gray-50 text-gray-500 text-sm">
+                              <Clock className="h-5 w-5 text-gray-400 mb-2" />
+                              <span>No time slots available on this date</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Notes */}
+                        <div>
+                          <label className="text-sm font-medium mb-2 block">
+                            Additional Notes (Optional)
+                          </label>
+                          <Textarea
+                            placeholder="Any specific concerns or requirements..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            rows={3}
+                            className="border-teal-200 focus:border-teal-400"
+                          />
+                        </div>
+
+                        {/* Booking Summary */}
+                        {selectedService && selectedTime && apartmentStreet && (
+                          <div className="bg-gradient-to-br from-teal-50 to-blue-50 p-5 rounded-lg space-y-3 border-2 border-teal-200">
+                            <h4 className="font-semibold text-lg text-teal-900 mb-3">
+                              Booking Summary
+                            </h4>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Service:</span>
+                              <span className="font-medium">{selectedService}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Date:</span>
+                              <span className="font-medium">{date?.toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Time:</span>
+                              <span className="font-medium">{selectedTime}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Duration:</span>
+                              <span className="font-medium">30 minutes</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">Location:</span>
+                              <span className="font-medium text-right max-w-[60%]">
+                                {apartmentStreet}
+                                {landmark && ` (Near ${landmark})`}
                               </span>
                             </div>
+                            <div className="border-t border-teal-300 pt-3 mt-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-teal-900">Total:</span>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-blue-500 bg-clip-text text-transparent">
+                                  ${provider.consultationFee}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-        <Button
-          className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
-          size="lg"
-          onClick={handleBooking}
-          disabled={
-            !selectedService ||
-            !selectedTime ||
-            !locationData.address ||
-            !locationData.lat ||
-            !locationData.lng
-          }
-        >
-          Confirm Booking
-        </Button>
-      </div>
-    </LoadScript>
-  </DialogContent>
-</Dialog>
+                        <Button
+                          className="w-full bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 cursor-pointer"
+                          size="lg"
+                          onClick={handleBooking}
+                          disabled={
+                            !selectedService ||
+                            !selectedTime ||
+                            !locationData.address ||
+                            !locationData.lat ||
+                            !locationData.lng ||
+                            !apartmentStreet.trim()
+                          }
+                        >
+                          Confirm Booking
+                        </Button>
+
+                        {!apartmentStreet.trim() && locationData.address && (
+                          <p className="text-xs text-amber-600 text-center -mt-2">
+                            ⚠️ Please enter your apartment/room and street details to proceed
+                          </p>
+                        )}
+                      </div>
+                    </LoadScript>
+                  </DialogContent>
+                </Dialog>
 
                 <div className="block" onClick={handleSendMessage}>
                   <Button
