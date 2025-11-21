@@ -228,9 +228,19 @@ import {
   Phone,
   Navigation,
   Eye,
+  Star,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -243,6 +253,12 @@ export default function PatientAppointments() {
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewingAppointment, setReviewingAppointment] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewError, setReviewError] = useState("");
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -265,6 +281,96 @@ export default function PatientAppointments() {
   useEffect(() => {
     fetchAppointments();
   }, []);
+
+  const openReviewModal = (appointment) => {
+    setReviewingAppointment(appointment);
+    setReviewRating(0);
+    setReviewComment("");
+    setReviewError("");
+    setReviewDialogOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setReviewDialogOpen(false);
+    setReviewRating(0);
+    setReviewComment("");
+    setReviewError("");
+    setReviewingAppointment(null);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating || !reviewComment.trim()) {
+      alert("Please provide both rating and comment");
+      return;
+    }
+
+    setReviewSubmitting(true);
+    setReviewError("");
+
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return null;
+    };
+
+    const token = localStorage.getItem("token") || getCookie("token");
+
+    if (!token) {
+      alert("You must be logged in to submit a review. Please login first.");
+      setReviewSubmitting(false);
+      return;
+    }
+
+    try {
+      if (!reviewingAppointment || !reviewingAppointment.provider) {
+        throw new Error("Missing appointment or provider information");
+      }
+
+      const providerId =
+        reviewingAppointment.provider.providerId ||
+        reviewingAppointment.provider.id;
+
+      if (!providerId) {
+        throw new Error("Provider ID not found");
+      }
+
+      const res = await fetch(
+        `${BACKEND_URL}/providers/${providerId}/review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: reviewRating,
+            comment: reviewComment,
+            appointmentId: reviewingAppointment.id,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit review");
+      }
+
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === reviewingAppointment.id ? { ...apt, hasReview: true } : apt
+        )
+      );
+
+      closeReviewModal();
+    } catch (err) {
+      console.error(err);
+      setReviewError(err.message || "Failed to submit review");
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
  const upcoming = appointments.filter((a) => {
   const appointmentDate = new Date(a.appointmentDate);
@@ -318,6 +424,16 @@ const past = appointments.filter((a) => {
     }
   };
 
+  const getProviderName = (apt) => {
+    return (
+      apt?.provider?.user?.name ||
+      apt?.provider?.name ||
+      apt?.providerName ||
+      apt?.provider ||
+      "Provider"
+    );
+  };
+
   const renderAppointmentRow = (apt) => (
     <div
       key={apt.id}
@@ -326,7 +442,7 @@ const past = appointments.filter((a) => {
       {/* Left - Appointment Info */}
       <div className="flex-1 w-full space-y-2">
         <h3 className="text-lg font-semibold text-gray-800">
-          {apt.provider?.user?.name || "Provider"}
+          {getProviderName(apt)}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-2 text-sm text-gray-600">
@@ -385,6 +501,18 @@ const past = appointments.filter((a) => {
             <span className="text-xs text-blue-600 font-medium">
               🕒 Tracking will start when provider begins trip
             </span>
+          )}
+
+          {apt.status === "COMPLETED" && !apt.hasReview && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openReviewModal(apt)}
+              className="flex items-center gap-1"
+            >
+              <Star className="w-4 h-4" />
+              Review provider
+            </Button>
           )}
         </div>
       </div>
@@ -491,6 +619,95 @@ const past = appointments.filter((a) => {
             )}
           </TabsContent>
         </Tabs>
+
+        <Dialog
+          open={reviewDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              closeReviewModal();
+            }
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rate your experience</DialogTitle>
+              <DialogDescription>
+                Share your feedback about your recent visit so we can improve
+                your care.
+              </DialogDescription>
+            </DialogHeader>
+
+            {reviewingAppointment && (
+              <div className="space-y-4">
+                <div className="text-sm text-gray-700">
+                  <p className="font-semibold">
+                    {reviewingAppointment.provider?.user?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {reviewingAppointment.serviceType}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(
+                      new Date(reviewingAppointment.appointmentDate),
+                      "dd MMM yyyy"
+                    )}{" "}
+                    {reviewingAppointment.startTime} -{" "}
+                    {reviewingAppointment.endTime}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="focus:outline-none"
+                    >
+                      <Star
+                        className={`h-6 w-6 ${
+                          star <= reviewRating
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    {reviewRating ? `${reviewRating} / 5` : "Select rating"}
+                  </span>
+                </div>
+
+                <Textarea
+                  placeholder="Share your experience with this provider..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  rows={4}
+                />
+
+                {reviewError && (
+                  <p className="text-sm text-red-600">{reviewError}</p>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={closeReviewModal}
+                disabled={reviewSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitReview}
+                disabled={reviewSubmitting}
+              >
+                {reviewSubmitting ? "Submitting..." : "Submit Review"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

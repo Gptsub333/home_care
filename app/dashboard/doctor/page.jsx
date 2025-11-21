@@ -1300,8 +1300,7 @@ import Link from "next/link";
 import Appointments from "./appointments/page";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://home-care-backend.onrender.com/api";
+  process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function CompleteSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -1436,35 +1435,38 @@ export default function CompleteSettingsPage() {
 
   const fetchAppointments = async (token) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/appointments/provider/appointments`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/appointments/provider/dashboard-stats`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await res.json();
 
-      if (res.ok && data.appointments) {
-        const today = new Date().toISOString().split("T")[0];
+      if (res.ok && data.success && data.data) {
+        const stats = data.data;
 
-        // Filter today's appointments
-        const todayList = data.appointments.filter((appt) => {
-          const apptDate = new Date(appt.appointmentDate)
-            .toISOString()
-            .split("T")[0];
-          return apptDate === today;
-        });
+        setTodayAppointments(stats.todayAppointments || []);
 
-        setTodayAppointments(todayList);
         setCounts({
-          today: todayList.length,
-          total: data.appointments.length,
+          today:
+            typeof stats.todayAppointmentsCount === "number"
+              ? stats.todayAppointmentsCount
+              : (stats.todayAppointments || []).length,
+          total: stats.totalAppointments || 0,
         });
+
+        if (stats.rating && typeof stats.rating.average === "number") {
+          setAverageRating(stats.rating.average);
+        }
       }
     } catch (err) {
-      console.error("Error fetching appointments:", err);
+      console.error("Error fetching dashboard stats:", err);
     }
   };
 
@@ -1863,7 +1865,7 @@ export default function CompleteSettingsPage() {
                                 {apt.serviceType}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                {apt.address}
+                                {apt.serviceAddress || apt.address}
                               </p>
                             </div>
                           </div>
